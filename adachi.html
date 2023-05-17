@@ -31,26 +31,96 @@
 
 				{
 					'id': 0,
-					'title':'Hello Osaka',
-					'latlon': [34.6937,135.5023],
+					'title':'Hello Yoh',
+					'latlon': [35.83345186051053, 139.9506277580188],
 					'image': ''
 				},
 				
 				{
-					'id': 0,
-					'title':'Hello Osaka',
-					'latlon':[34.6,-118],
+					'id': 1,
+					'title':'Hello ',
+					'latlon':[],
 					'image': ''
 				},
+				
+				{
+					'id': 2,
+					'title':'Hello ',
+					'latlon':[],
+					'image': ''
+				},
+				
+				{
+					'id': 3,
+					'title':'Hello ',
+					'latlon':[],
+					'image': ''
+				},
+				
+				{
+					'id': 4,
+					'title':'Hello ',
+					'latlon':[],
+					'image': ''
+				},
+				
+				{
+					'id': 5,
+					'title':'Hello ',
+					'latlon':[],
+					'image': ''
+				},
+				
+				{
+					'id': 6,
+					'title':'Hello ',
+					'latlon':[],
+					'image': ''
+				},
+				
+				{
+					'id': 7,
+					'title':'Hello ',
+					'latlon':[],
+					'image': ''
+				},
+				
+				{
+					'id': 8,
+					'title':'Hello ',
+					'latlon':[],
+					'image': ''
+				},
+				
+				{
+					'id': 9,
+					'title':'Hello ',
+					'latlon':[],
+					'image': ''
+				},
+				
+				{
+					'id': 10,
+					'title':'Hello ',
+					'latlon':[],
+					'image': ''
+				},
+				
 				
 				
 			]
 
 			var map = L.map('map').setView([0,0], 2);
 
-			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-			}).addTo(map);
+			// add a satellite basemap from mapbox
+			let satellitecolor = L.tileLayer('https://api.mapbox.com/styles/v1/yohman/ckrh25hug05w018ndot6lycob/tiles/512/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieW9obWFuIiwiYSI6IkxuRThfNFkifQ.u2xRJMiChx914U7mOZMiZw', 
+			{
+				attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox/yohman</a>',
+				maxZoom: 18,
+				tileSize: 512,
+				zoomOffset: -1,
+				accessToken: 'pk.eyJ1IjoieW9obWFuIiwiYSI6IkxuRThfNFkifQ.u2xRJMiChx914U7mOZMiZw'
+			}).addTo(map)
 			
 			// create layer group
 			var places = L.featureGroup()
@@ -74,7 +144,8 @@
 
 			function goto(id){
 				console.log(id)
-				map.flyTo([data[id].lat,data[id].lon],10)
+				// map.flyTo([data[id].lat,data[id].lon],10)
+				map.flyTo(data[id].latlon,17)
 			}
 
 		</script>	
