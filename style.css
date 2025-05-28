@@ -260,46 +260,78 @@ font-family: Arial, Helvetica, sans-serif;
 #welcome-modal-content {
 	background-color: #333; /* Dark background */
 	color: #eee; /* Light text for contrast */
-	padding: 30px;
+	padding: 20px; /* Adjusted padding */
 	border-radius: 8px;
 	text-align: center;
 	box-shadow: 0 5px 15px rgba(0,0,0,0.6); /* Darker shadow */
-	max-width: 90%;
-	width: 400px; /* Adjust as needed */
+	max-width: 90vw; /* Use viewport width percentage */
+	width: 400px; /* Max width for larger screens */
+	box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 #welcome-modal-content h1 {
-	font-size: 2.5em;
+	font-size: 2em; /* Adjusted font size */
 	color: #fff; /* White title */
 	margin-bottom: 15px;
 }
 
 #modal-qrcode {
-	width: 200px; /* Adjust size as needed */
-	height: 200px;
-	margin: 10px auto 20px;
+	width: 150px; /* Adjusted size */
+	height: 150px; /* Adjusted size */
+	margin: 10px auto 15px;
 	display: block;
 	filter: invert(100%); /* Invert the colors for dark mode */
 }
 
 #welcome-modal-content .slogan {
-	font-size: 1.2em;
+	font-size: 1em; /* Adjusted font size */
 	color: #ccc; /* Light gray slogan */
-	margin-bottom: 25px;
-	line-height: 1.6;
+	margin-bottom: 20px;
+	line-height: 1.5;
 }
 
 #modal-close-button {
 	background-color: #555; /* Dark gray button */
 	color: #eee; /* Light text */
 	border: none;
-	padding: 12px 25px;
-	font-size: 1.1em;
+	padding: 10px 20px; /* Adjusted padding */
+	font-size: 1em; /* Adjusted font size */
 	border-radius: 5px;
 	cursor: pointer;
 	transition: background-color 0.2s ease;
+	width: 80%; /* Make button wider on mobile */
+	max-width: 250px; /* But not too wide on larger modals */
 }
 
 #modal-close-button:hover {
 	background-color: #777; /* Lighter gray on hover */
+}
+
+/* Media Query for smaller screens */
+@media (max-width: 600px) {
+	#welcome-modal-content {
+		padding: 15px;
+		width: 90vw; /* Ensure it fits small screens */
+	}
+
+	#welcome-modal-content h1 {
+		font-size: 1.8em;
+	}
+
+	#modal-qrcode {
+		width: 120px;
+		height: 120px;
+		margin-bottom: 10px;
+	}
+
+	#welcome-modal-content .slogan {
+		font-size: 0.9em;
+		margin-bottom: 15px;
+	}
+
+	#modal-close-button {
+		padding: 10px 15px;
+		font-size: 0.95em;
+		width: 90%; /* Full width button on small screens */
+	}
 }
