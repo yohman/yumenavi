@@ -4,40 +4,302 @@ body,html {
 	width:100%;
 }
 
+.author {
+	font-style: italic;
+	margin-bottom: 10px !important;
+	color: #333;
+}
+h2 {
+	font-size: 1.5em !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+h3 {
+	font-size: 1.4em !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+.maplibregl-popup-content p {
+	font-size: 1em !important;
+}
+
 #map {
 	height: 100%;
 }
 
 body {
-    display: grid;
-	grid-template-rows: 80px 1fr;
-	grid-template-columns: 350px 1fr;
-	grid-template-areas: 
-	"header header"
-	"sidebar content";
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Full viewport height */
+    overflow: hidden; /* Prevent body scrollbars if children are managed */
 }
 
 .header {
-	grid-area: header;
-	padding:10px;
+    padding: 10px;
     background-color: #fff;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    /* Header height is determined by its content or could be fixed */
+    /* Example: height: 60px; flex-shrink: 0; */
+    flex-shrink: 0; /* Prevent header from shrinking if content is too large */
+}
+
+.header img:first-child {
+    margin-right: auto; /* Pushes other items to the right */
+}
+
+.header img {
+    height: 60px; /* Adjust as needed */
+    margin-left: 10px;
+}
+
+.main-area { /* NEW: This container will hold sidebar and content side-by-side */
+    display: flex;
+    flex-direction: row; /* Arrange sidebar and content horizontally */
+    flex: 1; /* Take remaining vertical space from body */
+    overflow: hidden; /* Prevent scrollbars on main-area, children handle their own scroll */
+    position: relative; /* Needed for absolute positioning of hamburger if it's a direct child */
 }
 
 .sidebar {
-	grid-area: sidebar;
-	padding:10px;
-    background-color: #555;
-	overflow: scroll;
+    width: 300px; /* Fixed width for sidebar */
+    background-color: #666;
+    padding: 10px;
+    overflow-y: auto; /* Scroll for sidebar items if they overflow */
+    border-right: 1px solid #ddd;
+    flex-shrink: 0; /* Prevent sidebar from shrinking */
+    transition: width 0.2s ease-in-out, padding 0.2s ease-in-out; /* Smooth transition */
 }
 
-.content {
-	grid-area: content;
+.sidebar.sidebar-closed {
+    width: 0;
+    padding: 0 0; /* Remove padding when closed */
+    overflow: hidden; /* Hide content when closed */
+    border-right: none;
 }
 
 .sidebar-item {
-	font-family: Arial, Helvetica, sans-serif;
-	margin: 5px;
-	padding: 10px;
-	background-color: #fff;
-	border:5px solid #333;
+font-family: Arial, Helvetica, sans-serif;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #fff;
+    /* border: 5px solid #333; */
+    padding: 10px;
+    /* border-bottom: 1px solid #eee; */
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.sidebar-item:hover {
+    background-color: #f0f0f0;
+}
+
+.sidebar-item h3 {
+    margin: 0 0 5px 0;
+    font-size: 1em;
+}
+
+.sidebar-item p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.content {
+    flex: 1; /* Takes remaining horizontal space in .main-area */
+    display: flex;
+    flex-direction: column; /* Stack map and timeline vertically */
+    position: relative; /* For potential absolute positioning of children if needed */
+    overflow: hidden; /* Prevent scrollbars on content, map/timeline handle their own */
+}
+
+#hamburger-menu {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1001; /* Above map controls but below popups if necessary */
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 8px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+#hamburger-menu span {
+    display: block;
+    width: 22px;
+    height: 3px;
+    background-color: #333;
+    margin: 4px 0;
+    border-radius: 1px;
+}
+
+#map {
+    flex-grow: 1; /* Map takes available vertical space in content */
+    width: 100%;
+    height: 100%; /* Ensure map takes full height of its flex-grow space */
+}
+
+.timeline-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    background-color: rgba(37, 37, 37, 0.9); /* Semi-transparent white */
+    border-top: 1px solid #ddd;
+    /* The following lines position it at the bottom of the map area if map has fixed height or content is relative */
+    /* position: absolute; 
+    bottom: 0;
+    left: 0;
+    right: 0; 
+    z-index: 1000; */
+    /* For now, keep it in normal flow below the map */
+    box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+}
+
+.timeline-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 8px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.timeline-item:hover {
+    background-color: #e9e9e9;
+}
+
+.timeline-circle {
+    width: 28px;
+    height: 28px;
+    background-color: #d0d0d0;
+    border-radius: 50%;
+    border: 2px solid #b0b0b0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.timeline-circle.active {
+    background-color: #3e3e3e; /* A nice blue */
+    border-color: #010101; /* Darker blue for border */
+    box-shadow: 0 0 0 2px white, 0 0 0 1px #e7e7e7; /* Halo effect */
+}
+
+.timeline-label {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #fff;
+    text-align: center;
+    max-width: 50px; /* Prevent very long labels from breaking layout */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* MapLibre popup customization (optional) */
+.maplibregl-popup-content {
+    font-family: sans-serif;
+    padding: 10px !important; /* Override default padding */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    border-radius: 4px;
+}
+
+.maplibregl-popup-content h3 {
+    font-size: 1.1em;
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.maplibregl-popup-content p {
+    font-size: 0.9em;
+    margin: 0;
+    color: #555;
+}
+
+.maplibregl-popup-close-button {
+    font-size: 1.5em;
+    padding: 0 5px;
+    color: #777;
+}
+.maplibregl-popup-close-button:hover {
+    background-color: transparent;
+    color: #333;
+}
+/* Welcome Modal Styles */
+#welcome-modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.9); /* Dark semi-transparent black overlay */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 2000; /* Ensure it's on top of everything */
+	opacity: 1;
+	transition: opacity 0.3s ease-in-out;
+}
+
+#welcome-modal-overlay.modal-hidden {
+	opacity: 0;
+	pointer-events: none; /* Disable interaction when hidden */
+}
+
+#welcome-modal-content {
+	background-color: #333; /* Dark background */
+	color: #eee; /* Light text for contrast */
+	padding: 30px;
+	border-radius: 8px;
+	text-align: center;
+	box-shadow: 0 5px 15px rgba(0,0,0,0.6); /* Darker shadow */
+	max-width: 90%;
+	width: 400px; /* Adjust as needed */
+}
+
+#welcome-modal-content h1 {
+	font-size: 2.5em;
+	color: #fff; /* White title */
+	margin-bottom: 15px;
+}
+
+#modal-qrcode {
+	width: 200px; /* Adjust size as needed */
+	height: 200px;
+	margin: 10px auto 20px;
+	display: block;
+	filter: invert(100%); /* Invert the colors for dark mode */
+}
+
+#welcome-modal-content .slogan {
+	font-size: 1.2em;
+	color: #ccc; /* Light gray slogan */
+	margin-bottom: 25px;
+	line-height: 1.6;
+}
+
+#modal-close-button {
+	background-color: #555; /* Dark gray button */
+	color: #eee; /* Light text */
+	border: none;
+	padding: 12px 25px;
+	font-size: 1.1em;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+#modal-close-button:hover {
+	background-color: #777; /* Lighter gray on hover */
 }
