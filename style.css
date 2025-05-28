@@ -44,19 +44,43 @@ body {
     border-bottom: 1px solid #ddd;
     display: flex;
     align-items: center;
-    /* Header height is determined by its content or could be fixed */
-    /* Example: height: 60px; flex-shrink: 0; */
     flex-shrink: 0; /* Prevent header from shrinking if content is too large */
+    overflow: hidden; /* Prevent content from visually overflowing the header */
 }
 
+/* Remove the old, potentially problematic rule for the first image */
+/*
 .header img:first-child {
-    margin-right: auto; /* Pushes other items to the right */
+    margin-right: auto; 
+}
+*/
+
+/* Styling for the logo's link container */
+.header #logo-link {
+    margin-right: auto; /* Pushes the "me.png" image to the right */
+    display: flex;      /* Ensures the image inside is well-contained */
+    align-items: center;
+    flex-shrink: 1;     /* Allow this container to shrink if needed */
+    min-width: 0;       /* Allows shrinking below intrinsic content width */
 }
 
+/* General styling for ALL images within the header */
 .header img {
-    height: 60px; /* Adjust as needed */
-    margin-left: 10px;
+    max-height: 60px; /* Default max height, images will scale maintaining aspect ratio */
+    width: auto;      /* Maintain aspect ratio */
+    display: block;   /* Removes extra space that inline display might add */
+    margin-left: 0;   /* Reset margin-left from any previous generic rule */
+    max-width: 100%;  /* Crucial: image won't be wider than its container (the <a> or the flex space) */
 }
+
+/* Specific styling for the "me.png" image (direct child of .header) */
+.header > img {
+    margin-left: 10px; /* Space between the logo container and this image */
+    flex-shrink: 1;    /* Allow this image to shrink if space is tight.
+                           Combined with max-height and width:auto, it will scale down. */
+    /* max-height and max-width are handled by the general .header img rule */
+}
+
 
 .main-area { /* NEW: This container will hold sidebar and content side-by-side */
     display: flex;
@@ -334,4 +358,29 @@ font-family: Arial, Helvetica, sans-serif;
 		font-size: 0.95em;
 		width: 90%; /* Full width button on small screens */
 	}
+}
+
+/* Media Queries for header image scaling */
+@media (max-width: 768px) {
+    .header {
+        padding: 8px; /* Slightly reduce header padding */
+    }
+    .header img { /* Affects all images in header */
+        max-height: 50px; /* Reduce max height of images */
+    }
+    .header > img { /* Specifically for direct child images like "me.png" */
+        margin-left: 8px; /* Reduce margin */
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 5px; /* Further reduce header padding */
+    }
+    .header img { /* Affects all images in header */
+        max-height: 40px; /* Further reduce max height of images */
+    }
+    .header > img { /* Specifically for direct child images like "me.png" */
+        margin-left: 5px; /* Further reduce margin */
+    }
 }
