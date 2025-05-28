@@ -294,17 +294,30 @@ font-family: Arial, Helvetica, sans-serif;
 }
 
 #welcome-modal-content h1 {
-	font-size: 2em; /* Adjusted font size */
+	font-size: 3em; /* Adjusted font size */
 	color: #fff; /* White title */
 	margin-bottom: 15px;
+	
 }
 
 #modal-qrcode {
-	width: 150px; /* Adjusted size */
-	height: 150px; /* Adjusted size */
-	margin: 10px auto 15px;
+	width: 220px; /* Adjusted size */
+	height: 220px; /* Adjusted size */
+	margin: 10px auto 5px; /* Reduced bottom margin */
 	display: block;
 	filter: invert(100%); /* Invert the colors for dark mode */
+}
+
+#form-link {
+    display: block;
+    margin: 5px auto 15px; /* Spacing around the link */
+    color: #8ab4f8; /* A light blue, common for links in dark themes */
+    text-decoration: underline;
+    font-size: 0.9em;
+}
+
+#form-link:hover {
+    color: #aecbfa; /* Lighter blue on hover */
 }
 
 #welcome-modal-content .slogan {
@@ -345,8 +358,13 @@ font-family: Arial, Helvetica, sans-serif;
 	#modal-qrcode {
 		width: 120px;
 		height: 120px;
-		margin-bottom: 10px;
+		margin-bottom: 5px; /* Reduced bottom margin */
 	}
+
+    #form-link {
+        margin: 5px auto 10px; /* Adjusted margin for smaller screens */
+        font-size: 0.85em;
+    }
 
 	#welcome-modal-content .slogan {
 		font-size: 0.9em;
