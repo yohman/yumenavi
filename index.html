@@ -43,6 +43,13 @@
 				<span></span>
 			</div>
 			<div id="horizontal-card-scroller"></div> <!-- New horizontal scroller div -->
+			<!-- Search Feature HTML -->
+			<div id="search-container">
+				<input type="text" id="search-input" placeholder="Search...">
+				<div id="search-icon">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg>
+				</div>
+			</div>
 			<div id="map"></div>
 			<div class="timeline-controls"></div> <!-- Added for timeline controls -->
 
@@ -58,11 +65,14 @@
 
 				let sheet = null;
 				let sheet2 = []; // Initialize sheet2
-				const avatarImageFiles = ['boy.png', 'girl.png', 'man.png', 'woman.png', 'old-man.png', 'old-woman.png', 'young-man.png', 'young-woman.png', 'senior-man.png', 'senior-woman.png', 'sporty-boy.png', 'sporty-girl.png', 'otaku-boy.png', 'otaku-girl.png', 'nerdy-boy.png', 'nerdy-girl.png', 'rock-boy.png', 'rock-girl.png', 'computer-boy.png', 'computer-girl.png', 'anime-boy.png', 'anime-girl.png', 'basketball-boy.png', 'basketball-girl.png', 'soccer-boy.png', 'soccer-girl.png', 'artist-boy.png', 'artist-girl.png'];
+				// const avatarImageFiles = ['boy.png', 'girl.png', 'man.png', 'woman.png', 'old-man.png', 'old-woman.png', 'young-man.png', 'young-woman.png', 'senior-man.png', 'senior-woman.png', 'sporty-boy.png', 'sporty-girl.png', 'otaku-boy.png', 'otaku-girl.png', 'nerdy-boy.png', 'nerdy-girl.png', 'rock-boy.png', 'rock-girl.png', 'computer-boy.png', 'computer-girl.png', 'anime-boy.png', 'anime-girl.png', 'basketball-boy.png', 'basketball-girl.png', 'soccer-boy.png', 'soccer-girl.png', 'artist-boy.png', 'artist-girl.png'];
+				// AvatarImageFiles is no longer needed as avatar name comes from sheet
 
 				let map; // Declare map globally
 				let markers = []; // To keep track of marker instances
 				let basemapLayers = [];
+				let currentFilteredData = []; // For search results
+
 				let currentBasemapId = 'google-satellite'; // Default active basemap changed to Google Satellite ("Today")
 				// Global state for initial map view, potentially from URL
 				let mapInitState = { lat: null, lon: null, zoom: null, basemapIdFromUrl: null, urlStateApplied: false };
@@ -182,42 +192,44 @@
 					console.log(sheet)
 					let id = 0
 					sheet.forEach(function(element){
-						// Assuming header is the first row (id=0) and will be skipped.
-						// New structure: Timestamp (0), Author (1), Title (2), Description (3), Lat/Lon (4)
-						if(id > 0 && element && element.length > 4 && element[4] !== undefined)
+						// Original sheet structure:
+						// Col 0: Timestamp, Col 1: Author, Col 2: Title, Col 3: Description, Col 4: Coords
+						// Col 5: Age, Col 6: Avatar Name (e.g., "sport-boy"), Col 7: Hashtag, Col 8: Genre
+						// We need at least up to Avatar Name (index 6) and Coords (index 4) to be present.
+						if(id > 0 && element && element.length > 6 && element[4] !== undefined && element[6] !== undefined)
 						{
 							let coordSource = element[4];
 							let processedCoordString = null;
 
 							if (typeof coordSource === 'string') {
-								processedCoordString = coordSource.trim(); // Trim whitespace
+								processedCoordString = coordSource.trim(); 
 								if (processedCoordString.startsWith('[') && processedCoordString.endsWith(']')) {
-									processedCoordString = processedCoordString.slice(1, -1).trim(); // Remove brackets and trim again
+									processedCoordString = processedCoordString.slice(1, -1).trim(); 
 								} else if (processedCoordString.startsWith('(') && processedCoordString.endsWith(')')) {
-									processedCoordString = processedCoordString.slice(1, -1).trim(); // Remove parentheses and trim again
+									processedCoordString = processedCoordString.slice(1, -1).trim(); 
 								}
 							}
 
-							// Check if the processed string contains a comma
 							if (processedCoordString && processedCoordString.includes(',')) {
 								element[4] = processedCoordString; // Update element with cleaned string
 								
-								// Pre-assign avatar URL
-								const randomAvatarFile = avatarImageFiles[Math.floor(Math.random() * avatarImageFiles.length)];
-								const avatarUrl = `images/avatars/${randomAvatarFile}`;
-								element.push(avatarUrl); // Add avatarUrl to the element array (now at index 5 for original data, 6 after unshift)
+								// Construct avatar URL from Avatar Name (element[6])
+								const avatarName = element[6];
+								const avatarUrl = `images/avatars/${avatarName}.png`;
+								element.push(avatarUrl); // Add constructed avatarUrl to the end of the element array
 
 								element.unshift(id); // Add a unique ID to the beginning of each row
 								sheet2.push(element);
 							} else {
 								console.warn("Skipping row due to invalid coordinates (no comma after processing):", element, "Raw coord data:", coordSource);
 							}
-						} else if (id > 0) { // If it's a data row (not header) but failed the checks
-							console.warn("Skipping row due to incomplete data structure or missing coordinates field (expected at original column 5):", element);
+						} else if (id > 0) { 
+							console.warn("Skipping row due to incomplete data structure (expected at least 7 columns for essential data, up to Avatar Name) or missing coordinates/avatar name:", element);
 						}
 						id++
 					})
 					console.log(sheet2)
+					currentFilteredData = [...sheet2]; // Initialize with all data
 					setupMapAndUI(); // New main setup function
 				})
 				.catch(error => {
@@ -227,19 +239,19 @@
 
 				function setupMapAndUI() {
 					console.log("Setting up map and UI...");
-					parseUrlHash(); // Parse URL hash first to set initial state
-					initializeBasemapData(); // Initialize basemap definitions
-					// If URL provided a basemapId, update currentBasemapId before initializing map
+					parseUrlHash(); 
+					initializeBasemapData(); 
 					if (mapInitState.basemapIdFromUrl && basemapLayers.find(b => b.id === mapInitState.basemapIdFromUrl)) {
 						currentBasemapId = mapInitState.basemapIdFromUrl;
 					}
-					initMapInstance(); 
-					populateSidebar(); 
-					populateHorizontalScroller(); // Call the new function
+					initMapInstance(); // This will call refreshMapContent internally on style.load
+					populateSidebar(currentFilteredData); 
+					populateHorizontalScroller(currentFilteredData); 
 					createTimelineControls(); 
 					setupHamburgerMenu();
 					setupHeaderLogoLink();
-					setupModal(); // Add this call
+					setupModal();
+					setupSearchFeature(); // Add this call
 				}
 
 				function setupModal() {
@@ -386,7 +398,7 @@
 
 					map.on('style.load', () => {
 						console.log("Map style loaded.");
-						refreshMapContent(); 
+						refreshMapContent(currentFilteredData); // Pass current (possibly filtered) data
 
 					});
 
@@ -394,55 +406,62 @@
 					map.on('zoomend', updateUrlHash);
 				}
 				
-				function refreshMapContent() {
-					if (!map || !sheet2 || sheet2.length === 0) {
+				function refreshMapContent(dataToDisplay) { // Modified to accept data
+					if (!map || !dataToDisplay) { // Check dataToDisplay
 						console.log("Map not ready or no data for markers.");
 						return;
 					}
 
 					// Clear existing markers
 					markers.forEach(marker => marker.remove());
-					markers = [];
+					markers = []; // Reset markers array
 
 					const bounds = new maplibregl.LngLatBounds();
 					let validMarkersExist = false;
 					
-					sheet2.forEach(function(item, index){ // Added index for unique logging
-						// After unshift(id) and push(avatarUrl):
-						// item[0]=id, 
-						// item[1]=original_col0 (Timestamp), 
-						// item[2]=original_col1 (Author), 
-						// item[3]=original_col2 (Title), 
-						// item[4]=original_col3 (Description), 
-						// item[5]=original_col4 (lat,lon string)
-						// item[6]=avatarUrl
+					dataToDisplay.forEach(function(item, index){ // Use dataToDisplay
+						// New sheet2 item structure after processing:
+						// item[0]=id (generated)
+						// item[1]=Timestamp (original col 0)
+						// item[2]=Author (original col 1)
+						// item[3]=Title (original col 2)
+						// item[4]=Description (original col 3)
+						// item[5]=Coordinates (original col 4, "lat,lon" string)
+						// item[6]=Age (original col 5)
+						// item[7]=Avatar Name (raw, original col 6, e.g., "sport-boy")
+						// item[8]=Hashtag (original col 7, might be undefined if not present in sheet)
+						// item[9]=Genre (original col 8, might be undefined if not present in sheet)
+						// item[10]=avatarUrl (constructed: images/avatars/${original_col_6}.png)
+
 						if (!item[5] || typeof item[5] !== 'string' || !item[5].includes(',')) {
-							console.warn("Skipping item in refreshMapContent due to missing or invalid coordinates string at item[5]:", item[3] || 'Unknown title', "Coords string:", item[5]);
+							console.warn("Skipping item in refreshMapContent due to missing or invalid coordinates string at item[5]:", item[3] || `Item ID ${item[0]}`, "Coords string:", item[5]);
 							return;
 						}
-						if (!item[6]) { // Check for avatarUrl
-							console.warn("Skipping item in refreshMapContent due to missing avatarUrl at item[6]:", item[3] || 'Unknown title');
+						if (!item[10]) { // Check for avatarUrl (now at index 10)
+							console.warn("Skipping item in refreshMapContent due to missing avatarUrl at item[10]:", item[3] || `Item ID ${item[0]}`);
 							return;
 						}
 
-						const itemId = item[0]; // Get the unique ID for goto()
+						const itemId = item[0]; 
 
 						let latlonArray; 
 						try {
-							latlonArray = item[5].split(',').map(Number); // Parses "lat,lon" string into [lat, lon]
+							latlonArray = item[5].split(',').map(Number); 
 							if (latlonArray.length !== 2 || isNaN(latlonArray[0]) || isNaN(latlonArray[1])) {
 								throw new Error("Invalid coordinate format");
 							}
 						} catch (e) {
-							console.warn("Error parsing coordinates for item:", item[3] || 'Unknown title', item[5], e);
+							console.warn("Error parsing coordinates for item:", item[3] || `Item ID ${item[0]}`, item[5], e);
 							return;
 						}
 						
-						let lngLat = [latlonArray[1], latlonArray[0]]; // Swap to [lon, lat]
+						let lngLat = [latlonArray[1], latlonArray[0]]; 
 						const author = item[2] || 'N/A';
 						const title = item[3] || 'N/A';
 						const description = item[4] || 'No description.';
-						const imageUrl = item[6]; // Use pre-assigned avatarUrl
+						const imageUrl = item[10]; // Use constructed avatarUrl from item[10]
+						const genre = item[9] || ''; // Genre from item[9]
+						const hashtag = item[8] || ''; // Hashtag from item[8]
 						
 						 const markerContainer = document.createElement('div');
 						 markerContainer.style.display = 'flex';
@@ -467,18 +486,29 @@
 						 markerContainer.appendChild(iconEl); 
 						 markerContainer.appendChild(lineEl); 
 
-						// Add click listener to the marker's element to call goto()
 						markerContainer.addEventListener('click', (event) => {
-							event.stopPropagation(); // Prevent MapLibre's default popup toggle on this click
+							event.stopPropagation(); 
 							goto(itemId);
 						});
+
+						// Updated Popup HTML with Genre and Hashtag
+						let genrePillHTML = '';
+						if (genre) {
+							const genreParts = genre.split(' ');
+							const firstWordOfGenre = genreParts[0];
+							genrePillHTML = `<span class="popup-genre-pill" title="${genre}">${firstWordOfGenre}</span>`;
+						}
+						// const genrePillHTML = genre ? `<span class="popup-genre-pill">${genre}</span>` : '';
+						const hashtagHTML = hashtag ? `<p class="popup-hashtag">${hashtag}</p>` : '';
 
 						const popupHTML = `
 							<img src="${imageUrl}" class="popup-protruding-icon">
 							<div class="popup-text-content">
 								<h3>${title}</h3>
+								${genrePillHTML}
 								<p class="popup-author-detail">${author}</p>
 								<p>${description}</p>
+								${hashtagHTML}
 							</div>`;
 						
 						const popup = new maplibregl.Popup({ offset: 25 }) 
@@ -498,39 +528,33 @@
 						validMarkersExist = true;
 					});
 					
-					// Only fitBounds if the view wasn't set by URL parameters
-					if (!mapInitState.urlStateApplied && validMarkersExist && !bounds.isEmpty()) {
+					// Only fitBounds if the view wasn't set by URL parameters AND it's the initial load (no search term)
+					if (!mapInitState.urlStateApplied && validMarkersExist && !bounds.isEmpty() && document.getElementById('search-input').value === '') {
 						map.fitBounds(bounds, {
 							padding: {top: 100, bottom:100, left: 100, right: 100}, 
 							maxZoom: 17 
 						});
-					} else if (!mapInitState.urlStateApplied && sheet2.length > 0 && (!validMarkersExist || bounds.isEmpty())) {
-						// If no URL state, data exists, but no valid markers to bound, set default view (already done by map init)
-						console.warn("No valid markers to bound, map initialized with default center/zoom.");
-						// map.setCenter([140.123, 35.605]); // Default GSI center
-						// map.setZoom(10); // Default GSI zoom
-					} else if (!mapInitState.urlStateApplied && sheet2.length === 0) {
-						// No URL state and no data, map initialized with default center/zoom
-						 console.log("No data, map initialized with default center/zoom.");
+					} else if (!mapInitState.urlStateApplied && dataToDisplay.length > 0 && (!validMarkersExist || bounds.isEmpty())) {
+						console.warn("No valid markers to bound for current filter, map initialized with default/current center/zoom.");
+					} else if (!mapInitState.urlStateApplied && dataToDisplay.length === 0) {
+						 console.log("No data for current filter, map initialized with default/current center/zoom.");
 					}
 				}
 				
-				function populateSidebar() {
+				function populateSidebar(dataToDisplay) { // Modified to accept data
 					const sidebar = $('.sidebar');
 					sidebar.empty(); 
-					if (!sheet2 || sheet2.length === 0) return;
+					if (!dataToDisplay || dataToDisplay.length === 0) return; // Check dataToDisplay
 
-					sheet2.forEach(function(item){
-						 // item[0]=id, item[1]=Timestamp, item[2]=Author, item[3]=Title, item[4]=Description, item[5]=Coords, item[6]=avatarUrl
-						 if (item[0] === undefined || item[2] === undefined || item[6] === undefined) { 
-							// console.warn("Skipping sidebar item due to missing id, author, or avatarUrl:", item);
+					dataToDisplay.forEach(function(item){ // Use dataToDisplay
+						 // item[0]=id, item[2]=Author, item[10]=avatarUrl
+						 if (item[0] === undefined || item[2] === undefined || item[10] === undefined) { 
 							return;
 						}
 						const itemId = item[0];
 						const author = item[2];
-						const avatarUrl = item[6];
+						const avatarUrl = item[10]; // Avatar URL is at index 10
 
-						// New simpler HTML structure for the sidebar item
 						const sidebarItemHTML = `
 							<div class="sidebar-item" onclick="goto(${itemId})">
 								<img src="${avatarUrl}" class="sidebar-item-icon-img">
@@ -540,19 +564,19 @@
 					});
 				}
 
-				function populateHorizontalScroller() {
+				function populateHorizontalScroller(dataToDisplay) { // Modified to accept data
 					const scroller = $('#horizontal-card-scroller');
 					scroller.empty();
-					if (!sheet2 || sheet2.length === 0) return;
+					if (!dataToDisplay || dataToDisplay.length === 0) return; // Check dataToDisplay
 
-					sheet2.forEach(function(item) {
-						// item[0]=id, item[1]=Timestamp, item[2]=Author, ..., item[6]=avatarUrl
-						if (item[0] === undefined || item[2] === undefined || item[6] === undefined) {
+					dataToDisplay.forEach(function(item) { // Use dataToDisplay
+						// item[0]=id, item[2]=Author, item[10]=avatarUrl
+						if (item[0] === undefined || item[2] === undefined || item[10] === undefined) {
 							return;
 						}
 						const itemId = item[0];
 						const author = item[2];
-						const avatarUrl = item[6];
+						const avatarUrl = item[10]; // Avatar URL is at index 10
 
 						const cardHTML = `
 							<div class="horizontal-card" data-id="${itemId}" onclick="goto(${itemId})">
@@ -595,6 +619,54 @@
 						});
 						controlsContainer.appendChild(itemContainer);
 					});
+				}
+
+				function setupSearchFeature() {
+					const searchContainer = document.getElementById('search-container');
+					const searchIcon = document.getElementById('search-icon');
+					const searchInput = document.getElementById('search-input');
+
+					searchIcon.addEventListener('click', () => {
+						searchContainer.classList.toggle('search-active');
+						if (searchContainer.classList.contains('search-active')) {
+							searchInput.focus();
+						} else {
+							searchInput.value = ''; // Clear search on close
+							filterAndRefreshUI(''); // Reset filter
+						}
+					});
+
+					searchInput.addEventListener('input', (event) => {
+						const searchTerm = event.target.value.toLowerCase();
+						filterAndRefreshUI(searchTerm);
+					});
+				}
+
+				function filterAndRefreshUI(searchTerm) {
+					if (!searchTerm || searchTerm.trim() === '') {
+						currentFilteredData = [...sheet2];
+					} else {
+						currentFilteredData = sheet2.filter(item => {
+							const author = (item[2] || '').toLowerCase();
+							const title = (item[3] || '').toLowerCase();
+							const description = (item[4] || '').toLowerCase();
+							const hashtag = (item[8] || '').toLowerCase();
+							const genre = (item[9] || '').toLowerCase(); // Full genre string for searching
+
+							return author.includes(searchTerm) ||
+								   title.includes(searchTerm) ||
+								   description.includes(searchTerm) ||
+								   hashtag.includes(searchTerm) ||
+								   genre.includes(searchTerm);
+						});
+					}
+					// When map style reloads (e.g. basemap change), it calls refreshMapContent.
+					// We need to ensure it uses the latest filtered data.
+					// So, directly call refreshMapContent here.
+					refreshMapContent(currentFilteredData);
+					populateSidebar(currentFilteredData);
+					populateHorizontalScroller(currentFilteredData);
+					// Active card highlighting in goto() will still work based on IDs.
 				}
 
 				function switchBasemap(basemapId) {

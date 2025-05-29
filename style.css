@@ -164,9 +164,9 @@ body {
 
 #hamburger-menu {
     position: absolute;
-    top: 10px;
+    top: 10px; /* Default top position */
     left: 10px;
-    z-index: 1002; /* Ensure hamburger is above the new scroller */
+    z-index: 1002; /* Ensure hamburger is above the new scroller and search */
     background-color: rgba(255, 255, 255, 0.8);
     border: 1px solid #ccc;
     border-radius: 3px;
@@ -182,16 +182,71 @@ body {
     left: 0;
     right: 0;
     width: 100%;
-    height: 110px; /* Adjust height as needed for cards + padding */
-    background-color: rgba(51, 51, 51, 0.5); /* Semi-transparent dark background */
-    overflow-x: auto;  /* Enable horizontal scrolling */
-    overflow-y: hidden; /* Disable vertical scrolling */
-    white-space: nowrap; /* Keep cards in a single line */
-    padding: 7px;     /* Padding inside the scroller */
+    height: 110px; 
+    background-color: rgba(51, 51, 51, 0.5); 
+    overflow-x: auto;  
+    overflow-y: hidden; 
+    white-space: nowrap; 
+    padding: 7px;     
     box-sizing: border-box;
-    z-index: 1000; /* Below hamburger, above map */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    z-index: 1001; /* Below hamburger, above map and search icon (when search is not active) */
+    -webkit-overflow-scrolling: touch; 
 }
+
+/* Search Feature Styles */
+#search-container {
+    position: absolute;
+    top: 120px; /* Below horizontal scroller */
+    right: 15px;
+    z-index: 1000; /* Default z-index */
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 25px; /* Circular when collapsed */
+    padding: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+    width: 40px; /* Initial width for icon */
+    height: 40px; /* Initial height for icon */
+    overflow: hidden; /* Hide input initially */
+}
+
+#search-container.search-active {
+    width: 250px; /* Expanded width */
+    z-index: 1003; /* Above scroller and hamburger when active */
+    background-color: rgba(255, 255, 255, 1);
+}
+
+#search-icon {
+    cursor: pointer;
+    padding: 3px; /* Small padding around SVG */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+#search-icon svg {
+    fill: #333;
+}
+
+#search-input {
+    border: none;
+    outline: none;
+    padding: 5px 8px;
+    font-size: 1em;
+    width: 0; /* Initially hidden */
+    opacity: 0;
+    transition: width 0.3s ease-in-out 0.1s, opacity 0.2s ease-in-out 0.1s; /* Delay opacity transition */
+    background-color: transparent;
+    margin-left: 5px;
+}
+
+#search-container.search-active #search-input {
+    width: calc(100% - 40px); /* Full width minus icon and padding */
+    opacity: 1;
+}
+
 
 /* Individual card style within the horizontal scroller */
 .horizontal-card {
@@ -356,6 +411,18 @@ body {
     font-weight: bold;
 }
 
+/* New style for Genre Pill */
+.popup-genre-pill {
+    display: inline-block;
+    background-color: #e0e0e0; /* Light grey background */
+    color: #555; /* Darker grey text */
+    padding: 3px 8px;
+    border-radius: 12px; /* Pill shape */
+    font-size: 0.75em;
+    margin-bottom: 8px; /* Space below the pill */
+    font-weight: 500;
+}
+
 .popup-author-detail { /* New class for author in this layout */
     font-size: 0.85em;
     color: #555;
@@ -368,6 +435,14 @@ body {
     margin: 0 0 5px 0; /* Adjust spacing for description */
     color: #444;
     line-height: 1.4;
+}
+
+/* New style for Hashtag */
+.popup-hashtag {
+    font-size: 0.8em;
+    color: #007bff; /* Blue color for hashtag */
+    margin-top: 10px; /* Space above the hashtag */
+    font-weight: 500;
 }
 
 
