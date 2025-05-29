@@ -166,7 +166,7 @@ body {
     position: absolute;
     top: 10px;
     left: 10px;
-    z-index: 1001; /* Above map controls but below popups if necessary */
+    z-index: 1002; /* Ensure hamburger is above the new scroller */
     background-color: rgba(255, 255, 255, 0.8);
     border: 1px solid #ccc;
     border-radius: 3px;
@@ -175,14 +175,80 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
-#hamburger-menu span {
-    display: block;
-    width: 22px;
-    height: 3px;
-    background-color: #333;
-    margin: 4px 0;
-    border-radius: 1px;
+/* Horizontal Card Scroller Styles */
+#horizontal-card-scroller {
+    position: absolute;
+    top: 0; /* Position at the top of the .content area */
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 110px; /* Adjust height as needed for cards + padding */
+    background-color: rgba(51, 51, 51, 0.5); /* Semi-transparent dark background */
+    overflow-x: auto;  /* Enable horizontal scrolling */
+    overflow-y: hidden; /* Disable vertical scrolling */
+    white-space: nowrap; /* Keep cards in a single line */
+    padding: 7px;     /* Padding inside the scroller */
+    box-sizing: border-box;
+    z-index: 1000; /* Below hamburger, above map */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
+
+/* Individual card style within the horizontal scroller */
+.horizontal-card {
+    display: inline-flex; /* Use inline-flex for better alignment control */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 70px; /* Width of each card */
+    height: 80px; /* Height of each card, should be less than scroller height minus padding */
+    background-color: rgba(255, 255, 255, 0.5); /* Slightly transparent white cards */
+    border-radius: 6px;
+    margin-right: 10px; /* Space between cards */
+    padding: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    vertical-align: top; /* Align cards to the top if using inline-block/inline-flex */
+}
+
+.horizontal-card:last-child {
+    margin-right: 0; /* No margin for the last card */
+}
+
+.horizontal-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+}
+
+/* Style for the selected card in the horizontal scroller */
+.horizontal-card-selected {
+    background-color: rgba(255, 255, 255, 0.95); /* A light orange/peach color for selection */
+    border: 2px solid #000; /* Dark orange border */
+    box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+    transform: translateY(-2px); /* Slight lift */
+}
+
+.horizontal-card-icon-img {
+    width: 60px; /* Icon size within the horizontal card */
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 6px; /* Space between icon and author */
+}
+
+.horizontal-card-author-name {
+    font-size: 0.75em;
+    color: #333;
+    text-align: center;
+    white-space: normal; /* Allow author name to wrap if too long */
+    word-break: break-word;
+    line-height: 1.2;
+    font-weight: 500;
+    max-height: 2.4em; /* Limit to two lines approx */
+    overflow: hidden;
+	margin: 0px;
+}
+
 
 #map {
     flex-grow: 1; /* Map takes available vertical space in content */

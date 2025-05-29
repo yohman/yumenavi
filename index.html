@@ -42,6 +42,7 @@
 				<span></span>
 				<span></span>
 			</div>
+			<div id="horizontal-card-scroller"></div> <!-- New horizontal scroller div -->
 			<div id="map"></div>
 			<div class="timeline-controls"></div> <!-- Added for timeline controls -->
 
@@ -234,6 +235,7 @@
 					}
 					initMapInstance(); 
 					populateSidebar(); 
+					populateHorizontalScroller(); // Call the new function
 					createTimelineControls(); 
 					setupHamburgerMenu();
 					setupHeaderLogoLink();
@@ -380,11 +382,11 @@
 
 					});
 
-					map.addControl(new maplibregl.NavigationControl());
+					// map.addControl(new maplibregl.NavigationControl());
 
 					map.on('style.load', () => {
 						console.log("Map style loaded.");
-						refreshMapContent(); // Keep this commented out for now to simplify
+						refreshMapContent(); 
 
 					});
 
@@ -538,6 +540,29 @@
 					});
 				}
 
+				function populateHorizontalScroller() {
+					const scroller = $('#horizontal-card-scroller');
+					scroller.empty();
+					if (!sheet2 || sheet2.length === 0) return;
+
+					sheet2.forEach(function(item) {
+						// item[0]=id, item[1]=Timestamp, item[2]=Author, ..., item[6]=avatarUrl
+						if (item[0] === undefined || item[2] === undefined || item[6] === undefined) {
+							return;
+						}
+						const itemId = item[0];
+						const author = item[2];
+						const avatarUrl = item[6];
+
+						const cardHTML = `
+							<div class="horizontal-card" data-id="${itemId}" onclick="goto(${itemId})">
+								<img src="${avatarUrl}" class="horizontal-card-icon-img">
+								<p class="horizontal-card-author-name">${author}</p>
+							</div>`;
+						scroller.append(cardHTML);
+					});
+				}
+
 				function createTimelineControls() {
 					const controlsContainer = document.querySelector('.timeline-controls');
 					if (!controlsContainer) {
@@ -598,6 +623,23 @@
 
 				function goto(id){
 						console.log("Going to ID:", id);
+
+						// Highlight the card in the horizontal scroller
+						const scroller = document.getElementById('horizontal-card-scroller');
+						if (scroller) {
+							// Remove highlight from all cards
+							const allCards = scroller.querySelectorAll('.horizontal-card');
+							allCards.forEach(card => card.classList.remove('horizontal-card-selected'));
+
+							// Add highlight to the selected card
+							const selectedCard = scroller.querySelector(`.horizontal-card[data-id="${id}"]`);
+							if (selectedCard) {
+								selectedCard.classList.add('horizontal-card-selected');
+								// Scroll the selected card into view
+								selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+							}
+						}
+
 						const item = sheet2.find(sublist => sublist[0] === id);
 						// Coordinates are now at item[5]
 						if (item && item[5]) {
