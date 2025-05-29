@@ -1,556 +1,636 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>The Story of a Japanese High School</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Added for mobile friendliness -->
+	<title>The Story of a Japanese High School</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Added for mobile friendliness -->
 
-    <!-- MapLibre GL JS -->
-    <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
-    <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />
+	<!-- MapLibre GL JS -->
+	<script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
+	<link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />
 
-    <!-- jquery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+	<!-- jquery -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
-    <!-- stylesheets -->
-    <link rel="stylesheet" href="style.css">
+	<!-- stylesheets -->
+	<link rel="stylesheet" href="style.css">
 
 </head>
 <body>
 
-    <div id="welcome-modal-overlay">
-        <div id="welcome-modal-content">
-            <h1>Mapろう！</h1>
-            <img src="images/qrcode.png" alt="QR Code" id="modal-qrcode">
+	<div id="welcome-modal-overlay">
+		<div id="welcome-modal-content">
+			<h1>Mapろう！</h1>
+			<img src="images/qrcode.png" alt="QR Code" id="modal-qrcode">
 			<a href="https://docs.google.com/forms/d/e/1FAIpQLSfXPt1yca5nZY26U4hsEinVi0WsFPqheEV-ed_TiX7KtzGp-g/viewform?usp=header" target="_blank" id="form-link">あなたも地図に載ろう！➡︎</a>
-            <p class="slogan">地図と物語で、未知の世界へ飛び込もう！</p>
+			<p class="slogan">地図と物語で、未知の世界へ飛び込もう！</p>
 			<button id="modal-close-button">冒険を始める！ <br>Begin your journey &rarr;</button>
-        </div>
-    </div>
+		</div>
+	</div>
 
-    <div class="header">
-        <!-- <img src="http://www.shutoku.ac.jp/img/common/header__logo@2x.png" width=> -->
-        <!-- <img src="images/sakura.png" width=> -->
-        <a href="#" id="logo-link"><img src="images/matsudo-minami.png" width=></a>
-        <img src="images/me.png" width=60> 
-    </div>
-    <div class="main-area"> <!-- NEW WRAPPER for sidebar and content -->
-        <div class="sidebar sidebar-closed"></div> <!-- Added sidebar-closed class -->
-        <div class="content">
-            <div id="hamburger-menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-            <div id="map"></div>
-            <div class="timeline-controls"></div> <!-- Added for timeline controls -->
+	<div class="header">
+		<!-- <img src="http://www.shutoku.ac.jp/img/common/header__logo@2x.png" width=> -->
+		<!-- <img src="images/sakura.png" width=> -->
+		<a href="#" id="logo-link"><img src="images/matsudo-minami.png" width=></a>
+		<img src="images/me.png" width=60> 
+	</div>
+	<div class="main-area"> <!-- NEW WRAPPER for sidebar and content -->
+		<div class="sidebar sidebar-closed"></div> <!-- Added sidebar-closed class -->
+		<div class="content">
+			<div id="hamburger-menu">
+				<span></span>
+				<span></span>
+				<span></span>
+			</div>
+			<div id="map"></div>
+			<div class="timeline-controls"></div> <!-- Added for timeline controls -->
 
-            <script>
+			<script>
 
-                // Define the URL of the REST API endpoint
+				// Define the URL of the REST API endpoint
 				// const sheetId = '1t44Ph4w29o4N59AXAv672uTDtKpa1wxdLQAIRjveMi0';
 				const sheetId = '1SkLkL2Hfw5wD3-ZfASaT5H4lCwMKRvkSGL1HZpVWMGs';
 
-                // const apiUrl = 'https://sheets.googleapis.com/v4/spreadsheets/'+sheetId+'/values/Form Responses 1?key=AIzaSyAUi4KazffmDZV_dQUnMUKA1jJt4i0mqlU';
+				// const apiUrl = 'https://sheets.googleapis.com/v4/spreadsheets/'+sheetId+'/values/Form Responses 1?key=AIzaSyAUi4KazffmDZV_dQUnMUKA1jJt4i0mqlU';
 
 				const apiUrl = 'https://sheets.googleapis.com/v4/spreadsheets/'+sheetId+'/values/map?key=AIzaSyAUi4KazffmDZV_dQUnMUKA1jJt4i0mqlU';
 
-                let sheet = null;
-                let sheet2 = []; // Initialize sheet2
-                let map; // Declare map globally
-                let markers = []; // To keep track of marker instances
-                let basemapLayers = [];
-                let currentBasemapId = 'google-satellite'; // Default active basemap changed to Google Satellite ("Today")
-                // Global state for initial map view, potentially from URL
-                let mapInitState = { lat: null, lon: null, zoom: null, basemapIdFromUrl: null, urlStateApplied: false };
+				let sheet = null;
+				let sheet2 = []; // Initialize sheet2
+				const avatarImageFiles = ['boy.png', 'girl.png', 'man.png', 'woman.png', 'old-man.png', 'old-woman.png', 'young-man.png', 'young-woman.png', 'senior-man.png', 'senior-woman.png', 'sporty-boy.png', 'sporty-girl.png', 'otaku-boy.png', 'otaku-girl.png', 'nerdy-boy.png', 'nerdy-girl.png', 'rock-boy.png', 'rock-girl.png', 'computer-boy.png', 'computer-girl.png', 'anime-boy.png', 'anime-girl.png', 'basketball-boy.png', 'basketball-girl.png', 'soccer-boy.png', 'soccer-girl.png', 'artist-boy.png', 'artist-girl.png'];
 
-                function initializeBasemapData() {
-                    basemapLayers = [
-                        { 
-                            id: 'gsi-std', 
-                            name: 'GSI Standard', 
-                            group: 'GSI', 
-                            style: {
-                                version: 8,
-                                sources: {
-                                    'gsi-std': {
-                                        type: "raster",
-                                        tiles: [
-                                            "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"
-                                        ],
-                                        tileSize: 256,
-                                        attribution: "地理院タイル &copy; <a href=\"https://www.gsi.go.jp/\" target=\"_blank\">国土地理院</a>"
-                                    }
-                                },
-                                layers: [
-                                    {
-                                        id: "gsi-std-layer",
-                                        type: "raster",
-                                        source: "gsi-std",
-                                        minzoom: 0,
-                                        maxzoom: 18
-                                    }
-                                ]
-                            }, 
-                            note: 'GSI Standard Map.' 
-                        },
-                        {
-                            id: 'gsi-ort-old10',
-                            name: '1961',
-                            group: 'GSI',
-                            note: 'Coverage may be limited.',
-                            style: {
-                                version: 8,
-                                sources: { 'gsi-ort-old10': { type: 'raster', tiles: ['https://cyberjapandata.gsi.go.jp/xyz/ort_old10/{z}/{x}/{y}.png'], tileSize: 256, attribution: '地理院タイル &copy; <a href="https://www.gsi.go.jp/" target="_blank">国土地理院</a>' }},
-                                layers: [{ id: 'gsi-ort-old10-layer', type: 'raster', source: 'gsi-ort-old10', minzoom: 0, maxzoom: 17 }]
-                            }
-                        },
-                        {
-                            id: 'gsi-gazo1',
-                            name: '1974',
-                            group: 'GSI',
-                            note: 'Coverage may be limited. JPG format.',
-                            style: {
-                                version: 8,
-                                sources: { 'gsi-gazo1': { type: 'raster', tiles: ['https://cyberjapandata.gsi.go.jp/xyz/gazo1/{z}/{x}/{y}.jpg'], tileSize: 256, attribution: '地理院タイル &copy; <a href="https://www.gsi.go.jp/" target="_blank">国土地理院</a>' }},
-                                layers: [{ id: 'gsi-gazo1-layer', type: 'raster', source: 'gsi-gazo1', minzoom: 0, maxzoom: 17 }]
-                            }
-                        },
-                        {
-                            id: 'gsi-gazo2',
-                            name: '1979',
-                            group: 'GSI',
-                            note: 'Coverage may be limited. JPG format.',
-                            style: {
-                                version: 8,
-                                sources: { 'gsi-gazo2': { type: 'raster', tiles: ['https://cyberjapandata.gsi.go.jp/xyz/gazo2/{z}/{x}/{y}.jpg'], tileSize: 256, attribution: '地理院タイル &copy; <a href="https://www.gsi.go.jp/" target="_blank">国土地理院</a>' }},
-                                layers: [{ id: 'gsi-gazo2-layer', type: 'raster', source: 'gsi-gazo2', minzoom: 0, maxzoom: 17 }]
-                            }
-                        },
-                        {
-                            id: 'gsi-gazo3',
-                            name: '1984',
-                            group: 'GSI',
-                            note: 'Coverage may be limited. JPG format.',
-                            style: {
-                                version: 8,
-                                sources: { 'gsi-gazo3': { type: 'raster', tiles: ['https://cyberjapandata.gsi.go.jp/xyz/gazo3/{z}/{x}/{y}.jpg'], tileSize: 256, attribution: '地理院タイル &copy; <a href="https://www.gsi.go.jp/" target="_blank">国土地理院</a>' }},
-                                layers: [{ id: 'gsi-gazo3-layer', type: 'raster', source: 'gsi-gazo3', minzoom: 0, maxzoom: 17 }]
-                            }
-                        },
-                        {
-                            id: 'gsi-gazo4',
-                            name: '1987',
-                            group: 'GSI',
-                            note: 'Coverage may be limited. JPG format.',
-                            style: {
-                                version: 8,
-                                sources: { 'gsi-gazo4': { type: 'raster', tiles: ['https://cyberjapandata.gsi.go.jp/xyz/gazo4/{z}/{x}/{y}.jpg'], tileSize: 256, attribution: '地理院タイル &copy; <a href="https://www.gsi.go.jp/" target="_blank">国土地理院</a>' }},
-                                layers: [{ id: 'gsi-gazo4-layer', type: 'raster', source: 'gsi-gazo4', minzoom: 0, maxzoom: 17 }]
-                            }
-                        },
-                        {
-                            id: 'google-satellite',
-                            name: 'Today',
-                            group: 'Google',
-                            note: 'Usage may be subject to Google Maps Platform Terms of Service.',
-                            style: {
-                                version: 8,
-                                sources: { 'google-satellite': { type: 'raster', tiles: ['https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'], tileSize: 256, attribution: 'Map data &copy; <a href="https://www.google.com/intl/en_us/help/terms_maps/" target="_blank">Google</a>', maxzoom: 21 }},
-                                layers: [{ id: 'google-satellite-layer', type: 'raster', source: 'google-satellite' }]
-                            }
-                        }
-                    ];
-                }
+				let map; // Declare map globally
+				let markers = []; // To keep track of marker instances
+				let basemapLayers = [];
+				let currentBasemapId = 'google-satellite'; // Default active basemap changed to Google Satellite ("Today")
+				// Global state for initial map view, potentially from URL
+				let mapInitState = { lat: null, lon: null, zoom: null, basemapIdFromUrl: null, urlStateApplied: false };
 
-                // Use the fetch function to make a GET request
-                fetch(apiUrl)
-                .then(response => {
-                    // Check if the response status is OK (200)
-                    if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                    }
-                    // Parse the response as JSON
-                    return response.json();
-                })
-                .then(data => {
-                    // Handle the JSON data here
-                    sheet = data.values
-                    console.log(sheet)
-                    let id = 0
-                    sheet.forEach(function(element){
-                        // Assuming header is the first row (id=0) and will be skipped.
-                        // New structure: Timestamp (0), Author (1), Title (2), Description (3), Lat/Lon (4)
-                        // Row must have at least 5 columns (indices 0 through 4).
-                        // Coordinates are now expected at element[4] (5th column).
-                        if(id > 0 && element && element.length > 4 && element[4] !== undefined)
-                        {
-                            let coordSource = element[4];
-                            let processedCoordString = null;
+				function initializeBasemapData() {
+					basemapLayers = [
+						{ 
+							id: 'gsi-std', 
+							name: 'GSI Standard', 
+							group: 'GSI', 
+							style: {
+								version: 8,
+								sources: {
+									'gsi-std': {
+										type: "raster",
+										tiles: [
+											"https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"
+										],
+										tileSize: 256,
+										attribution: "地理院タイル &copy; <a href=\"https://www.gsi.go.jp/\" target=\"_blank\">国土地理院</a>"
+									}
+								},
+								layers: [
+									{
+										id: "gsi-std-layer",
+										type: "raster",
+										source: "gsi-std",
+										minzoom: 0,
+										maxzoom: 18
+									}
+								]
+							}, 
+							note: 'GSI Standard Map.' 
+						},
+						{
+							id: 'gsi-ort-old10',
+							name: '1961',
+							group: 'GSI',
+							note: 'Coverage may be limited.',
+							style: {
+								version: 8,
+								sources: { 'gsi-ort-old10': { type: 'raster', tiles: ['https://cyberjapandata.gsi.go.jp/xyz/ort_old10/{z}/{x}/{y}.png'], tileSize: 256, attribution: '地理院タイル &copy; <a href="https://www.gsi.go.jp/" target="_blank">国土地理院</a>' }},
+								layers: [{ id: 'gsi-ort-old10-layer', type: 'raster', source: 'gsi-ort-old10', minzoom: 0, maxzoom: 17 }]
+							}
+						},
+						{
+							id: 'gsi-gazo1',
+							name: '1974',
+							group: 'GSI',
+							note: 'Coverage may be limited. JPG format.',
+							style: {
+								version: 8,
+								sources: { 'gsi-gazo1': { type: 'raster', tiles: ['https://cyberjapandata.gsi.go.jp/xyz/gazo1/{z}/{x}/{y}.jpg'], tileSize: 256, attribution: '地理院タイル &copy; <a href="https://www.gsi.go.jp/" target="_blank">国土地理院</a>' }},
+								layers: [{ id: 'gsi-gazo1-layer', type: 'raster', source: 'gsi-gazo1', minzoom: 0, maxzoom: 17 }]
+							}
+						},
+						{
+							id: 'gsi-gazo2',
+							name: '1979',
+							group: 'GSI',
+							note: 'Coverage may be limited. JPG format.',
+							style: {
+								version: 8,
+								sources: { 'gsi-gazo2': { type: 'raster', tiles: ['https://cyberjapandata.gsi.go.jp/xyz/gazo2/{z}/{x}/{y}.jpg'], tileSize: 256, attribution: '地理院タイル &copy; <a href="https://www.gsi.go.jp/" target="_blank">国土地理院</a>' }},
+								layers: [{ id: 'gsi-gazo2-layer', type: 'raster', source: 'gsi-gazo2', minzoom: 0, maxzoom: 17 }]
+							}
+						},
+						{
+							id: 'gsi-gazo3',
+							name: '1984',
+							group: 'GSI',
+							note: 'Coverage may be limited. JPG format.',
+							style: {
+								version: 8,
+								sources: { 'gsi-gazo3': { type: 'raster', tiles: ['https://cyberjapandata.gsi.go.jp/xyz/gazo3/{z}/{x}/{y}.jpg'], tileSize: 256, attribution: '地理院タイル &copy; <a href="https://www.gsi.go.jp/" target="_blank">国土地理院</a>' }},
+								layers: [{ id: 'gsi-gazo3-layer', type: 'raster', source: 'gsi-gazo3', minzoom: 0, maxzoom: 17 }]
+							}
+						},
+						{
+							id: 'gsi-gazo4',
+							name: '1987',
+							group: 'GSI',
+							note: 'Coverage may be limited. JPG format.',
+							style: {
+								version: 8,
+								sources: { 'gsi-gazo4': { type: 'raster', tiles: ['https://cyberjapandata.gsi.go.jp/xyz/gazo4/{z}/{x}/{y}.jpg'], tileSize: 256, attribution: '地理院タイル &copy; <a href="https://www.gsi.go.jp/" target="_blank">国土地理院</a>' }},
+								layers: [{ id: 'gsi-gazo4-layer', type: 'raster', source: 'gsi-gazo4', minzoom: 0, maxzoom: 17 }]
+							}
+						},
+						{
+							id: 'google-satellite',
+							name: 'Today',
+							group: 'Google',
+							note: 'Usage may be subject to Google Maps Platform Terms of Service.',
+							style: {
+								version: 8,
+								sources: { 'google-satellite': { type: 'raster', tiles: ['https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'], tileSize: 256, attribution: 'Map data &copy; <a href="https://www.google.com/intl/en_us/help/terms_maps/" target="_blank">Google</a>', maxzoom: 21 }},
+								layers: [{ id: 'google-satellite-layer', type: 'raster', source: 'google-satellite' }]
+							}
+						}
+					];
+				}
 
-                            if (typeof coordSource === 'string') {
-                                processedCoordString = coordSource.trim(); // Trim whitespace
-                                if (processedCoordString.startsWith('[') && processedCoordString.endsWith(']')) {
-                                    processedCoordString = processedCoordString.slice(1, -1).trim(); // Remove brackets and trim again
-                                } else if (processedCoordString.startsWith('(') && processedCoordString.endsWith(')')) {
-                                    processedCoordString = processedCoordString.slice(1, -1).trim(); // Remove parentheses and trim again
-                                }
-                            }
+				// Use the fetch function to make a GET request
+				fetch(apiUrl)
+				.then(response => {
+					// Check if the response status is OK (200)
+					if (!response.ok) {
+					throw new Error('Network response was not ok');
+					}
+					// Parse the response as JSON
+					return response.json();
+				})
+				.then(data => {
+					// Handle the JSON data here
+					sheet = data.values
+					console.log(sheet)
+					let id = 0
+					sheet.forEach(function(element){
+						// Assuming header is the first row (id=0) and will be skipped.
+						// New structure: Timestamp (0), Author (1), Title (2), Description (3), Lat/Lon (4)
+						if(id > 0 && element && element.length > 4 && element[4] !== undefined)
+						{
+							let coordSource = element[4];
+							let processedCoordString = null;
 
-                            // Check if the processed string contains a comma
-                            if (processedCoordString && processedCoordString.includes(',')) {
-                                element[4] = processedCoordString; // Update element with cleaned string
-                                element.unshift(id); // Add a unique ID to the beginning of each row
-                                sheet2.push(element);
-                            } else {
-                                console.warn("Skipping row due to invalid coordinates (no comma after processing):", element, "Raw coord data:", coordSource);
-                            }
-                        } else if (id > 0) { // If it's a data row (not header) but failed the checks
-                            console.warn("Skipping row due to incomplete data structure or missing coordinates field (expected at original column 5):", element);
-                        }
-                        id++
-                    })
-                    console.log(sheet2)
-                    setupMapAndUI(); // New main setup function
-                })
-                .catch(error => {
-                    // Handle errors
-                    console.error('Fetch error:', error);
-                });
+							if (typeof coordSource === 'string') {
+								processedCoordString = coordSource.trim(); // Trim whitespace
+								if (processedCoordString.startsWith('[') && processedCoordString.endsWith(']')) {
+									processedCoordString = processedCoordString.slice(1, -1).trim(); // Remove brackets and trim again
+								} else if (processedCoordString.startsWith('(') && processedCoordString.endsWith(')')) {
+									processedCoordString = processedCoordString.slice(1, -1).trim(); // Remove parentheses and trim again
+								}
+							}
 
-                function setupMapAndUI() {
-    				console.log("Setting up map and UI...");
-                    parseUrlHash(); // Parse URL hash first to set initial state
-                    initializeBasemapData(); // Initialize basemap definitions
-                    // If URL provided a basemapId, update currentBasemapId before initializing map
-                    if (mapInitState.basemapIdFromUrl && basemapLayers.find(b => b.id === mapInitState.basemapIdFromUrl)) {
-                        currentBasemapId = mapInitState.basemapIdFromUrl;
-                    }
-                    initMapInstance(); 
-                    populateSidebar(); 
-                    createTimelineControls(); 
-                    setupHamburgerMenu();
-                    setupHeaderLogoLink();
-                    setupModal(); // Add this call
-                }
+							// Check if the processed string contains a comma
+							if (processedCoordString && processedCoordString.includes(',')) {
+								element[4] = processedCoordString; // Update element with cleaned string
+								
+								// Pre-assign avatar URL
+								const randomAvatarFile = avatarImageFiles[Math.floor(Math.random() * avatarImageFiles.length)];
+								const avatarUrl = `images/avatars/${randomAvatarFile}`;
+								element.push(avatarUrl); // Add avatarUrl to the element array (now at index 5 for original data, 6 after unshift)
 
-                function setupModal() {
-                    const modalOverlay = document.getElementById('welcome-modal-overlay');
-                    const modalCloseButton = document.getElementById('modal-close-button');
+								element.unshift(id); // Add a unique ID to the beginning of each row
+								sheet2.push(element);
+							} else {
+								console.warn("Skipping row due to invalid coordinates (no comma after processing):", element, "Raw coord data:", coordSource);
+							}
+						} else if (id > 0) { // If it's a data row (not header) but failed the checks
+							console.warn("Skipping row due to incomplete data structure or missing coordinates field (expected at original column 5):", element);
+						}
+						id++
+					})
+					console.log(sheet2)
+					setupMapAndUI(); // New main setup function
+				})
+				.catch(error => {
+					// Handle errors
+					console.error('Fetch error:', error);
+				});
 
-                    if (modalOverlay && modalCloseButton) {
-                        modalCloseButton.addEventListener('click', () => {
-                            modalOverlay.classList.add('modal-hidden');
-                        });
-                    }
-                }
+				function setupMapAndUI() {
+					console.log("Setting up map and UI...");
+					parseUrlHash(); // Parse URL hash first to set initial state
+					initializeBasemapData(); // Initialize basemap definitions
+					// If URL provided a basemapId, update currentBasemapId before initializing map
+					if (mapInitState.basemapIdFromUrl && basemapLayers.find(b => b.id === mapInitState.basemapIdFromUrl)) {
+						currentBasemapId = mapInitState.basemapIdFromUrl;
+					}
+					initMapInstance(); 
+					populateSidebar(); 
+					createTimelineControls(); 
+					setupHamburgerMenu();
+					setupHeaderLogoLink();
+					setupModal(); // Add this call
+				}
 
-                function setupHeaderLogoLink() {
-                    const logoLink = document.getElementById('logo-link');
-                    if (logoLink) {
-                        logoLink.addEventListener('click', (event) => {
-                            event.preventDefault(); // Prevent default anchor behavior
-                            window.location.hash = ''; // Clear the hash
-                            window.location.reload(); // Reload the page to reset to defaults
-                        });
-                    }
-                }
+				function setupModal() {
+					const modalOverlay = document.getElementById('welcome-modal-overlay');
+					const modalCloseButton = document.getElementById('modal-close-button');
 
-                function setupHamburgerMenu() {
-                    const hamburger = document.getElementById('hamburger-menu');
-                    const sidebar = document.querySelector('.sidebar');
-                    // const mainArea = document.querySelector('.main-area'); // No longer toggling class on main-area
+					if (modalOverlay && modalCloseButton) {
+						modalCloseButton.addEventListener('click', () => {
+							modalOverlay.classList.add('modal-hidden');
+						});
+					}
+				}
 
-                    if (hamburger && sidebar) {
-                        hamburger.addEventListener('click', () => {
-                            sidebar.classList.toggle('sidebar-closed');
-                            // mainArea.classList.toggle('sidebar-closed'); // Removed
-                            // It's important to resize the map after the transition/animation of sidebar is complete
-                            // or at least after the class change has taken effect.
-                            // A small timeout can help if there are CSS transitions.
-                            setTimeout(() => {
-                                if (map) {
-                                    map.resize();
-                                }
-                            }, 250); // Adjust timeout based on CSS transition duration
-                        });
-                    }
-                }
+				function setupHeaderLogoLink() {
+					const logoLink = document.getElementById('logo-link');
+					if (logoLink) {
+						logoLink.addEventListener('click', (event) => {
+							event.preventDefault(); // Prevent default anchor behavior
+							window.location.hash = ''; // Clear the hash
+							window.location.reload(); // Reload the page to reset to defaults
+						});
+					}
+				}
 
-                function parseUrlHash() {
-                    if (window.location.hash) {
-                        const hash = window.location.hash.substring(1); // Remove #
-                        // Expected format: !map=zoom/lat/lon/basemapId
-                        if (hash.startsWith('!map=')) {
-                            const parts = hash.substring(5).split('/');
-                            if (parts.length >= 3) { // zoom, lat, lon are minimum
-                                const zoom = parseFloat(parts[0]);
-                                const lat = parseFloat(parts[1]);
-                                const lon = parseFloat(parts[2]);
+				function setupHamburgerMenu() {
+					const hamburger = document.getElementById('hamburger-menu');
+					const sidebar = document.querySelector('.sidebar');
+					// const mainArea = document.querySelector('.main-area'); // No longer toggling class on main-area
 
-                                if (!isNaN(zoom) && !isNaN(lat) && !isNaN(lon)) {
-                                    mapInitState.zoom = zoom;
-                                    mapInitState.lat = lat;
-                                    mapInitState.lon = lon;
-                                    mapInitState.urlStateApplied = true;
-                                    console.log("Map state from URL:", mapInitState);
-                                }
-                                if (parts.length >= 4 && parts[3]) {
-                                    mapInitState.basemapIdFromUrl = parts[3];
-                                    // currentBasemapId will be updated in setupMapAndUI if valid
-                                }
-                            }
-                        }
-                    }
-                }
+					if (hamburger && sidebar) {
+						hamburger.addEventListener('click', () => {
+							sidebar.classList.toggle('sidebar-closed');
+							// mainArea.classList.toggle('sidebar-closed'); // Removed
+							// It's important to resize the map after the transition/animation of sidebar is complete
+							// or at least after the class change has taken effect.
+							// A small timeout can help if there are CSS transitions.
+							setTimeout(() => {
+								if (map) {
+									map.resize();
+								}
+							}, 250); // Adjust timeout based on CSS transition duration
+						});
+					}
+				}
 
-                function updateUrlHash() {
-                    if (!map) return;
-                    const center = map.getCenter();
-                    const zoom = map.getZoom();
-                    const lat = parseFloat(center.lat.toFixed(6)); // Limit precision
-                    const lon = parseFloat(center.lng.toFixed(6)); // Limit precision
-                    
-                    // Update global state for consistency if needed, though map is source of truth here
-                    // mapInitState.lat = lat; 
-                    // mapInitState.lon = lon;
-                    // mapInitState.zoom = zoom;
+				function parseUrlHash() {
+					if (window.location.hash) {
+						const hash = window.location.hash.substring(1); // Remove #
+						// Expected format: !map=zoom/lat/lon/basemapId
+						if (hash.startsWith('!map=')) {
+							const parts = hash.substring(5).split('/');
+							if (parts.length >= 3) { // zoom, lat, lon are minimum
+								const zoom = parseFloat(parts[0]);
+								const lat = parseFloat(parts[1]);
+								const lon = parseFloat(parts[2]);
 
-                    const newHash = `!map=${zoom}/${lat}/${lon}/${currentBasemapId}`;
-                    // Use replaceState to avoid flooding browser history for every map move
-                    if (history.replaceState) {
-                        history.replaceState(null, null, '#' + newHash);
-                    } else {
-                        window.location.hash = newHash;
-                    }
-                }
+								if (!isNaN(zoom) && !isNaN(lat) && !isNaN(lon)) {
+									mapInitState.zoom = zoom;
+									mapInitState.lat = lat;
+									mapInitState.lon = lon;
+									mapInitState.urlStateApplied = true;
+									console.log("Map state from URL:", mapInitState);
+								}
+								if (parts.length >= 4 && parts[3]) {
+									mapInitState.basemapIdFromUrl = parts[3];
+									// currentBasemapId will be updated in setupMapAndUI if valid
+								}
+							}
+						}
+					}
+				}
+
+				function updateUrlHash() {
+					if (!map) return;
+					const center = map.getCenter();
+					const zoom = map.getZoom();
+					const lat = parseFloat(center.lat.toFixed(6)); // Limit precision
+					const lon = parseFloat(center.lng.toFixed(6)); // Limit precision
+					
+					// Update global state for consistency if needed, though map is source of truth here
+					// mapInitState.lat = lat; 
+					// mapInitState.lon = lon;
+					// mapInitState.zoom = zoom;
+
+					const newHash = `!map=${zoom}/${lat}/${lon}/${currentBasemapId}`;
+					// Use replaceState to avoid flooding browser history for every map move
+					if (history.replaceState) {
+						history.replaceState(null, null, '#' + newHash);
+					} else {
+						window.location.hash = newHash;
+					}
+				}
 
 
-                function initMapInstance() {
-    				console.log("Initializing MapLibre map instance...");
-                    const initialBasemap = basemapLayers.find(b => b.id === currentBasemapId);
-                    if (!initialBasemap) {
-                        console.error("Initial basemap style not found:", currentBasemapId);
-                        // Fallback to a very basic style if default is missing, or handle error appropriately
-                        // Attempt to use the first defined basemap as a fallback if currentBasemapId is somehow invalid
-                        const fallbackBasemap = basemapLayers.length > 0 ? basemapLayers[0] : null;
-                        if (fallbackBasemap) {
-                            console.warn("Falling back to first defined basemap:", fallbackBasemap.id);
-                            currentBasemapId = fallbackBasemap.id;
-                            map = new maplibregl.Map({ container: 'map', style: fallbackBasemap.style, center: [140.123, 35.605], zoom: 10 });
-                        } else {
-                            // Absolute fallback if no basemaps are defined
-                             map = new maplibregl.Map({ container: 'map', center: [140.123, 35.605], zoom: 10});
-                        }
-                        map.on('style.load', refreshMapContent);
-                        return;
-                    }
+				function initMapInstance() {
+					console.log("Initializing MapLibre map instance...");
+					const initialBasemap = basemapLayers.find(b => b.id === currentBasemapId);
+					if (!initialBasemap) {
+						console.error("Initial basemap style not found:", currentBasemapId);
+						// Fallback to a very basic style if default is missing, or handle error appropriately
+						// Attempt to use the first defined basemap as a fallback if currentBasemapId is somehow invalid
+						const fallbackBasemap = basemapLayers.length > 0 ? basemapLayers[0] : null;
+						if (fallbackBasemap) {
+							console.warn("Falling back to first defined basemap:", fallbackBasemap.id);
+							currentBasemapId = fallbackBasemap.id;
+							map = new maplibregl.Map({ container: 'map', style: fallbackBasemap.style, center: [140.123, 35.605], 
+							zoom: 10,
+							pitch: 60, // Tilt the map
+							bearing: -17.6 // Optional: slight bearing for better 3D view
 
-                    let initialCenter = [140.123, 35.605]; // New default center
-                    let initialZoom = 10;       // New default zoom
+						 });
+						} else {
+							// Absolute fallback if no basemaps are defined
+							 map = new maplibregl.Map({ container: 'map', center: [140.123, 35.605], zoom: 10,
+							pitch: 60, // Tilt the map
+							bearing: -17.6 // Optional: slight bearing for better 3D view
+});
+						}
+						map.on('style.load', refreshMapContent);
+						return;
+					}
 
-                    if (mapInitState.urlStateApplied && mapInitState.lon !== null && mapInitState.lat !== null) {
-                        initialCenter = [mapInitState.lon, mapInitState.lat];
-                    }
-                    if (mapInitState.urlStateApplied && mapInitState.zoom !== null) {
-                        initialZoom = mapInitState.zoom;
-                    }
+					let initialCenter = [140.123, 35.605]; // New default center
+					let initialZoom = 10;       // New default zoom
 
-                    map = new maplibregl.Map({
-                        container: 'map',
-                        style: initialBasemap.style,
-                        center: initialCenter,
-                        zoom: initialZoom
-                    });
+					if (mapInitState.urlStateApplied && mapInitState.lon !== null && mapInitState.lat !== null) {
+						initialCenter = [mapInitState.lon, mapInitState.lat];
+					}
+					if (mapInitState.urlStateApplied && mapInitState.zoom !== null) {
+						initialZoom = mapInitState.zoom;
+					}
 
-                    map.addControl(new maplibregl.NavigationControl());
+					map = new maplibregl.Map({
+						container: 'map',
+						style: initialBasemap.style,
+						center: initialCenter,
+						zoom: initialZoom,
+							pitch: 60, // Tilt the map
+							bearing: -17.6 // Optional: slight bearing for better 3D view
 
-                    map.on('style.load', () => {
-                        refreshMapContent(); 
-                    });
+					});
 
-                    map.on('moveend', updateUrlHash);
-                    map.on('zoomend', updateUrlHash);
-                }
-                
-                function refreshMapContent() {
-                    if (!map || !sheet2 || sheet2.length === 0) {
-                        console.log("Map not ready or no data for markers.");
-                        return;
-                    }
+					map.addControl(new maplibregl.NavigationControl());
 
-                    // Clear existing markers
-                    markers.forEach(marker => marker.remove());
-                    markers = [];
+					map.on('style.load', () => {
+						console.log("Map style loaded.");
+						refreshMapContent(); // Keep this commented out for now to simplify
 
-                    const bounds = new maplibregl.LngLatBounds();
-                    let validMarkersExist = false;
-                    
-                    sheet2.forEach(function(item){
-                        // After unshift(id):
-                        // item[0]=id, 
-                        // item[1]=original_col0 (Timestamp), 
-                        // item[2]=original_col1 (Author), 
-                        // item[3]=original_col2 (Title), 
-                        // item[4]=original_col3 (Description), 
-                        // item[5]=original_col4 (lat,lon string)
-                        if (!item[5] || typeof item[5] !== 'string' || !item[5].includes(',')) {
-                            console.warn("Skipping item in refreshMapContent due to missing or invalid coordinates string at item[5]:", item[3] || 'Unknown title', "Coords string:", item[5]);
-                            return;
-                        }
-                        let latlonArray; 
-                        try {
-                            latlonArray = item[5].split(',').map(Number); // Parses "lat,lon" string into [lat, lon]
-                            if (latlonArray.length !== 2 || isNaN(latlonArray[0]) || isNaN(latlonArray[1])) {
-                                throw new Error("Invalid coordinate format");
-                            }
-                        } catch (e) {
-                            console.warn("Error parsing coordinates for item:", item[3] || 'Unknown title', item[5], e);
-                            return;
-                        }
-                        
-                        let lngLat = [latlonArray[1], latlonArray[0]]; // Swap to [lon, lat]
-                        
-                        // Use Author (item[2]), Title (item[3]), Description (item[4])
-                        const popup = new maplibregl.Popup({ offset: 25 })
-                            .setHTML('<h3>'+(item[3] || 'N/A')+'</h3><p class="author">'+(item[2] || 'N/A')+'</p><p>'+(item[4] || 'No description.')+'</p>');
+					});
 
-                        const marker = new maplibregl.Marker()
-                            .setLngLat(lngLat)
-                            .setPopup(popup)
-                            .addTo(map);
-                        markers.push(marker);
-                        
-                        bounds.extend(lngLat);
-                        validMarkersExist = true;
-                    });
-                    
-                    // Only fitBounds if the view wasn't set by URL parameters
-                    if (!mapInitState.urlStateApplied && validMarkersExist && !bounds.isEmpty()) {
-                        map.fitBounds(bounds, {
-                            padding: {top: 100, bottom:100, left: 100, right: 100}, 
-                            maxZoom: 17 
-                        });
-                    } else if (!mapInitState.urlStateApplied && sheet2.length > 0 && (!validMarkersExist || bounds.isEmpty())) {
-                        // If no URL state, data exists, but no valid markers to bound, set default view (already done by map init)
-                        console.warn("No valid markers to bound, map initialized with default center/zoom.");
-                        // map.setCenter([140.123, 35.605]); // Default GSI center
-                        // map.setZoom(10); // Default GSI zoom
-                    } else if (!mapInitState.urlStateApplied && sheet2.length === 0) {
-                        // No URL state and no data, map initialized with default center/zoom
-                         console.log("No data, map initialized with default center/zoom.");
-                    }
-                }
-                
-                function populateSidebar() {
-                    const sidebar = $('.sidebar');
-                    sidebar.empty(); 
-                    if (!sheet2 || sheet2.length === 0) return;
+					map.on('moveend', updateUrlHash);
+					map.on('zoomend', updateUrlHash);
+				}
+				
+				function refreshMapContent() {
+					if (!map || !sheet2 || sheet2.length === 0) {
+						console.log("Map not ready or no data for markers.");
+						return;
+					}
 
-                    sheet2.forEach(function(item){
-                         // item[0]=id, item[1]=Timestamp, item[2]=Author, item[3]=Title, item[4]=Description
-                         if (item[0] === undefined || item[2] === undefined || item[3] === undefined || item[4] === undefined) {
-                            // console.warn("Skipping sidebar item due to missing data:", item);
-                            return;
-                        }
-                        // Use Author (item[2]), Title (item[3]), Description (item[4])
-                        sidebar.append('<div class="sidebar-item" onclick="goto('+item[0]+')"><h2>'+item[3]+'</h2><p class="author">'+item[2]+'</p><p>'+item[4]+'</p></div>');
-                    });
-                }
+					// Clear existing markers
+					markers.forEach(marker => marker.remove());
+					markers = [];
 
-                function createTimelineControls() {
-                    const controlsContainer = document.querySelector('.timeline-controls');
-                    if (!controlsContainer) {
-                        console.error("Timeline controls container not found.");
-                        return;
-                    }
-                    controlsContainer.innerHTML = ''; // Clear existing controls
+					const bounds = new maplibregl.LngLatBounds();
+					let validMarkersExist = false;
+					
+					sheet2.forEach(function(item, index){ // Added index for unique logging
+						// After unshift(id) and push(avatarUrl):
+						// item[0]=id, 
+						// item[1]=original_col0 (Timestamp), 
+						// item[2]=original_col1 (Author), 
+						// item[3]=original_col2 (Title), 
+						// item[4]=original_col3 (Description), 
+						// item[5]=original_col4 (lat,lon string)
+						// item[6]=avatarUrl
+						if (!item[5] || typeof item[5] !== 'string' || !item[5].includes(',')) {
+							console.warn("Skipping item in refreshMapContent due to missing or invalid coordinates string at item[5]:", item[3] || 'Unknown title', "Coords string:", item[5]);
+							return;
+						}
+						if (!item[6]) { // Check for avatarUrl
+							console.warn("Skipping item in refreshMapContent due to missing avatarUrl at item[6]:", item[3] || 'Unknown title');
+							return;
+						}
 
-                    basemapLayers.forEach(layer => {
-                        const itemContainer = document.createElement('div');
-                        itemContainer.className = 'timeline-item';
-                        itemContainer.title = layer.note || layer.name; 
-                        itemContainer.dataset.basemapId = layer.id;
+						const itemId = item[0]; // Get the unique ID for goto()
 
-                        const circle = document.createElement('div');
-                        circle.className = 'timeline-circle';
-                        if (layer.id === currentBasemapId) {
-                            circle.classList.add('active');
-                        }
-                        
-                        const label = document.createElement('span');
-                        label.className = 'timeline-label';
-                        label.textContent = layer.name; 
+						let latlonArray; 
+						try {
+							latlonArray = item[5].split(',').map(Number); // Parses "lat,lon" string into [lat, lon]
+							if (latlonArray.length !== 2 || isNaN(latlonArray[0]) || isNaN(latlonArray[1])) {
+								throw new Error("Invalid coordinate format");
+							}
+						} catch (e) {
+							console.warn("Error parsing coordinates for item:", item[3] || 'Unknown title', item[5], e);
+							return;
+						}
+						
+						let lngLat = [latlonArray[1], latlonArray[0]]; // Swap to [lon, lat]
+						const author = item[2] || 'N/A';
+						const title = item[3] || 'N/A';
+						const description = item[4] || 'No description.';
+						const imageUrl = item[6]; // Use pre-assigned avatarUrl
+						
+						 const markerContainer = document.createElement('div');
+						 markerContainer.style.display = 'flex';
+						 markerContainer.style.flexDirection = 'column';
+						 markerContainer.style.alignItems = 'center';
+						 markerContainer.style.cursor = 'pointer'; // Add pointer cursor to indicate clickable
+						 
+						const iconEl = document.createElement('div');
+						iconEl.style.backgroundImage = `url(${imageUrl})`;
+						iconEl.style.width = '48px';
+						iconEl.style.height = '48px';
+						iconEl.style.borderRadius = '50%'; 
+						iconEl.style.backgroundSize = 'cover'; 
+						iconEl.style.backgroundRepeat = 'no-repeat'; 
+						iconEl.style.backgroundPosition = 'center'; 
 
-                        itemContainer.appendChild(circle);
-                        itemContainer.appendChild(label);
+						 const lineEl = document.createElement('div');
+						 lineEl.style.width = '2px';
+						 lineEl.style.height = '30px'; 
+						 lineEl.style.backgroundColor = 'white';
 
-                        itemContainer.addEventListener('click', () => {
-                            switchBasemap(layer.id);
-                        });
-                        controlsContainer.appendChild(itemContainer);
-                    });
-                }
+						 markerContainer.appendChild(iconEl); 
+						 markerContainer.appendChild(lineEl); 
 
-                function switchBasemap(basemapId) {
-                    const newBasemap = basemapLayers.find(b => b.id === basemapId);
-                    
-                    if (newBasemap && newBasemap.id !== currentBasemapId) {
-                        currentBasemapId = newBasemap.id;
-                        map.setStyle(newBasemap.style); // This will trigger 'style.load' which calls refreshMapContent
-                        // Update URL hash after basemap change
-                        updateUrlHash();
+						// Add click listener to the marker's element to call goto()
+						markerContainer.addEventListener('click', (event) => {
+							event.stopPropagation(); // Prevent MapLibre's default popup toggle on this click
+							goto(itemId);
+						});
 
-                        document.querySelectorAll('.timeline-controls .timeline-item').forEach(itemEl => {
-                            const circleEl = itemEl.querySelector('.timeline-circle');
-                            if (circleEl) {
-                                if (itemEl.dataset.basemapId === currentBasemapId) {
-                                    circleEl.classList.add('active');
-                                } else {
-                                    circleEl.classList.remove('active');
-                                }
-                            }
-                        });
-                    } else if (newBasemap && newBasemap.id === currentBasemapId) {
-                        console.log("Basemap already active:", basemapId);
-                    }
-                }
+						const popupHTML = `
+							<img src="${imageUrl}" class="popup-protruding-icon">
+							<div class="popup-text-content">
+								<h3>${title}</h3>
+								<p class="popup-author-detail">${author}</p>
+								<p>${description}</p>
+							</div>`;
+						
+						const popup = new maplibregl.Popup({ offset: 25 }) 
+							.setHTML(popupHTML);
 
-                function goto(id){
-                        console.log("Going to ID:", id);
-                        const item = sheet2.find(sublist => sublist[0] === id);
-                        // Coordinates are now at item[5]
-                        if (item && item[5]) {
-                            // Assuming item[5] is "latitude,longitude"
-                            let latlonArray = item[5].split(',').map(Number); // Parses "lat,lon" string into [lat, lon]
-                            // MapLibre needs [longitude, latitude]
-                            let lngLat = [latlonArray[1], latlonArray[0]]; // Swap to [lon, lat]
-                            console.log("Flying to:", lngLat);
-                            map.flyTo({
-                                center: lngLat,
+						const marker = new maplibregl.Marker({ 
+							element: markerContainer,
+							anchor: 'bottom', 
+						}) 
+							.setLngLat(lngLat)
+							.setPopup(popup) // MapLibre will still handle its default popup toggle
+							.addTo(map);
+						
+						markers.push(marker);
+						
+						bounds.extend(lngLat);
+						validMarkersExist = true;
+					});
+					
+					// Only fitBounds if the view wasn't set by URL parameters
+					if (!mapInitState.urlStateApplied && validMarkersExist && !bounds.isEmpty()) {
+						map.fitBounds(bounds, {
+							padding: {top: 100, bottom:100, left: 100, right: 100}, 
+							maxZoom: 17 
+						});
+					} else if (!mapInitState.urlStateApplied && sheet2.length > 0 && (!validMarkersExist || bounds.isEmpty())) {
+						// If no URL state, data exists, but no valid markers to bound, set default view (already done by map init)
+						console.warn("No valid markers to bound, map initialized with default center/zoom.");
+						// map.setCenter([140.123, 35.605]); // Default GSI center
+						// map.setZoom(10); // Default GSI zoom
+					} else if (!mapInitState.urlStateApplied && sheet2.length === 0) {
+						// No URL state and no data, map initialized with default center/zoom
+						 console.log("No data, map initialized with default center/zoom.");
+					}
+				}
+				
+				function populateSidebar() {
+					const sidebar = $('.sidebar');
+					sidebar.empty(); 
+					if (!sheet2 || sheet2.length === 0) return;
+
+					sheet2.forEach(function(item){
+						 // item[0]=id, item[1]=Timestamp, item[2]=Author, item[3]=Title, item[4]=Description, item[5]=Coords, item[6]=avatarUrl
+						 if (item[0] === undefined || item[2] === undefined || item[6] === undefined) { 
+							// console.warn("Skipping sidebar item due to missing id, author, or avatarUrl:", item);
+							return;
+						}
+						const itemId = item[0];
+						const author = item[2];
+						const avatarUrl = item[6];
+
+						// New simpler HTML structure for the sidebar item
+						const sidebarItemHTML = `
+							<div class="sidebar-item" onclick="goto(${itemId})">
+								<img src="${avatarUrl}" class="sidebar-item-icon-img">
+								<p class="sidebar-item-author-name">${author}</p>
+							</div>`;
+						sidebar.append(sidebarItemHTML);
+					});
+				}
+
+				function createTimelineControls() {
+					const controlsContainer = document.querySelector('.timeline-controls');
+					if (!controlsContainer) {
+						console.error("Timeline controls container not found.");
+						return;
+					}
+					controlsContainer.innerHTML = ''; // Clear existing controls
+
+					basemapLayers.forEach(layer => {
+						const itemContainer = document.createElement('div');
+						itemContainer.className = 'timeline-item';
+						itemContainer.title = layer.note || layer.name; 
+						itemContainer.dataset.basemapId = layer.id;
+
+						const circle = document.createElement('div');
+						circle.className = 'timeline-circle';
+						if (layer.id === currentBasemapId) {
+							circle.classList.add('active');
+						}
+						
+						const label = document.createElement('span');
+						label.className = 'timeline-label';
+						label.textContent = layer.name; 
+
+						itemContainer.appendChild(circle);
+						itemContainer.appendChild(label);
+
+						itemContainer.addEventListener('click', () => {
+							switchBasemap(layer.id);
+						});
+						controlsContainer.appendChild(itemContainer);
+					});
+				}
+
+				function switchBasemap(basemapId) {
+					const newBasemap = basemapLayers.find(b => b.id === basemapId);
+					
+					if (newBasemap && newBasemap.id !== currentBasemapId) {
+						currentBasemapId = newBasemap.id;
+						map.setStyle(newBasemap.style); // This will trigger 'style.load' which calls refreshMapContent
+						// Update URL hash after basemap change
+						updateUrlHash();
+
+						document.querySelectorAll('.timeline-controls .timeline-item').forEach(itemEl => {
+							const circleEl = itemEl.querySelector('.timeline-circle');
+							if (circleEl) {
+								if (itemEl.dataset.basemapId === currentBasemapId) {
+									circleEl.classList.add('active');
+								} else {
+									circleEl.classList.remove('active');
+								}
+							}
+						});
+					} else if (newBasemap && newBasemap.id === currentBasemapId) {
+						console.log("Basemap already active:", basemapId);
+					}
+				}
+
+				function goto(id){
+						console.log("Going to ID:", id);
+						const item = sheet2.find(sublist => sublist[0] === id);
+						// Coordinates are now at item[5]
+						if (item && item[5]) {
+							// Assuming item[5] is "latitude,longitude"
+							let latlonArray = item[5].split(',').map(Number); // Parses "lat,lon" string into [lat, lon]
+							// MapLibre needs [longitude, latitude]
+							let lngLat = [latlonArray[1], latlonArray[0]]; // Swap to [lon, lat]
+							console.log("Flying to:", lngLat);
+							map.flyTo({
+								center: lngLat,
 								// adjust speed
 								speed: 0.5, // Slower flyTo speed
-                                zoom: 16 // Consider making this zoom level also part of URL or a setting
-                            });
-                            // updateUrlHash will be called by 'moveend' event
-                            // Optionally, open the popup for the marker
-                            const targetMarker = markers.find(m => {
-                                const markerLngLat = m.getLngLat();
-                                return markerLngLat.lng === lngLat[0] && markerLngLat.lat === lngLat[1];
-                            });
-                            if (targetMarker && !targetMarker.getPopup().isOpen()) {
-                                targetMarker.togglePopup();
-                            }
+								zoom: 16 // Consider making this zoom level also part of URL or a setting
+							});
+							// updateUrlHash will be called by 'moveend' event
+							// Optionally, open the popup for the marker
+							const targetMarker = markers.find(m => {
+								const markerLngLat = m.getLngLat();
+								return markerLngLat.lng === lngLat[0] && markerLngLat.lat === lngLat[1];
+							});
+							if (targetMarker && !targetMarker.getPopup().isOpen()) {
+								targetMarker.togglePopup();
+							}
 
-                        } else {
-                            console.error("Could not find item or coordinates for id:", id);
-                        }
-                    }
+						} else {
+							console.error("Could not find item or coordinates for id:", id);
+						}
+					}
 
-            </script>	
+			</script>	
 
-        </div> <!-- Closing content div -->
-    </div> <!-- Closing main-area div -->
+		</div> <!-- Closing content div -->
+	</div> <!-- Closing main-area div -->
 
 </body>
 </html>

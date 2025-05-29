@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+ <html>
+
+ <head>
+	<meta charset="utf-8">
+	<title>Maplibre GL JS random markers</title>
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+	<script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
+	<link href="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.css" rel="stylesheet">
+	<style>
+	 body {
+		margin: 0;
+		padding: 0;
+	 }
+
+	 #map {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		width: 100%;
+	 }
+	 /* Optional: if you want to ensure markers are not cut off by map container */
+	 .maplibregl-marker {
+		overflow: visible !important; 
+	 }
+	</style>
+ </head>
+
+ <body>
+	<div id="map"></div>
+	<script>
+
+	const map = new maplibregl.Map({
+		container: 'map', // ID of your map container
+		style: {
+		version: 8,
+		sources: {
+			'google-satellite': {
+				type: "raster",
+				tiles: [
+					"https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+				],
+				tileSize: 256,
+				attribution: "Map data &copy; <a href=\"https://www.google.com/intl/en_us/help/terms_maps/\" target=\"_blank\">Google</a>",
+				maxzoom: 21
+			}
+		},
+		layers: [
+			{
+				id: "google-satellite-layer",
+				type: "raster",
+				source: "google-satellite"
+			}
+		]
+	},
+		center: [140.123, 35.605],
+		zoom: 10,
+		pitch: 60, // Tilt the map
+		bearing: -17.6 // Optional: slight bearing for better 3D view
+	});
+
+
+	//  var map = new maplibregl.Map({
+	// 	container: 'map',
+	// 	style: 'https://demotiles.maplibre.org/style.json',
+	// 	center: [140.123, 35.604], // Chiba
+	// 	zoom: 9
+	//  });
+
+	 map.on('load', function() {
+
+		const images = ['images/avatars/boy.png', 'images/avatars/girl.png', 'images/avatars/man.png', 'images/avatars/woman.png', 'images/avatars/young-man.png', 'images/avatars/young-woman.png'];
+
+		// Add markers
+		for (var i = 0; i < 10; i++) {
+		 // Generate random coordinates within Chiba
+		 var lng = 139.9 + Math.random() * 0.4;
+		 var lat = 35.5 + Math.random() * 0.3;
+
+		 // Select a random image
+		 var image = images[Math.floor(Math.random() * images.length)];
+
+		 // Create a custom marker
+		 var marker = new maplibregl.Marker({
+			 element: createCustomMarker(image),
+			 anchor: 'bottom' // Anchor the marker at the bottom of the leader line
+			})
+			.setLngLat([lng, lat])
+			.addTo(map);
+		}
+
+		function createCustomMarker(imageSrc) {
+			const container = document.createElement('div');
+			// Styles for the container to arrange icon and line
+			container.style.display = 'flex';
+			container.style.flexDirection = 'column';
+			container.style.alignItems = 'center';
+
+			const icon = document.createElement('div');
+			icon.style.backgroundImage = `url(${imageSrc})`;
+			icon.style.width = '48px';
+			icon.style.height = '48px';
+			icon.style.borderRadius = '50%';
+			icon.style.backgroundSize = 'cover';
+			icon.style.backgroundRepeat = 'no-repeat';
+			icon.style.backgroundPosition = 'center';
+			// icon.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)'; // Optional: add shadow to icon
+
+			const line = document.createElement('div');
+			line.style.width = '2px';
+			line.style.height = '30px'; // This is the visual "float" height of the leader line
+			line.style.backgroundColor = 'white';
+			// line.style.boxShadow = '0 1px 2px rgba(0,0,0,0.3)'; // Optional: add shadow to line
+
+			container.appendChild(icon); // Icon is on top
+			container.appendChild(line); // Line is below the icon
+
+			return container;
+		}
+	 });
+	</script>
+
+ </body>
+
+ </html>
