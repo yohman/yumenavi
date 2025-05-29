@@ -462,6 +462,13 @@ body {
     text-decoration: underline; /* Underline on hover */
 }
 
+#modal-logo {
+	width: 100%; /* Adjusted size for the logo */
+	height: auto; /* Maintain aspect ratio */
+	margin-bottom: 10px; /* Space below the logo */
+	display: block; /* Ensure it behaves like a block element */
+	
+}
 
 /* Remove or comment out old popup grid styles if they conflict */
 /*
