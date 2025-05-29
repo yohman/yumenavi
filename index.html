@@ -31,7 +31,8 @@
 	<div class="header">
 		<!-- <img src="http://www.shutoku.ac.jp/img/common/header__logo@2x.png" width=> -->
 		<!-- <img src="images/sakura.png" width=> -->
-		<a href="#" id="logo-link"><img src="images/matsudo-minami.png" width=></a>
+		<!-- <a href="#" id="logo-link"><img src="images/matsudo-minami.png" width=></a> -->
+		<a href="#" id="logo-link"><img src="images/kiseki.png" width=></a>
 		<img src="images/me.png" width=60> 
 	</div>
 	<div class="main-area"> <!-- NEW WRAPPER for sidebar and content -->
@@ -79,34 +80,7 @@
 
 				function initializeBasemapData() {
 					basemapLayers = [
-						{ 
-							id: 'gsi-std', 
-							name: 'GSI Standard', 
-							group: 'GSI', 
-							style: {
-								version: 8,
-								sources: {
-									'gsi-std': {
-										type: "raster",
-										tiles: [
-											"https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"
-										],
-										tileSize: 256,
-										attribution: "地理院タイル &copy; <a href=\"https://www.gsi.go.jp/\" target=\"_blank\">国土地理院</a>"
-									}
-								},
-								layers: [
-									{
-										id: "gsi-std-layer",
-										type: "raster",
-										source: "gsi-std",
-										minzoom: 0,
-										maxzoom: 18
-									}
-								]
-							}, 
-							note: 'GSI Standard Map.' 
-						},
+
 						{
 							id: 'gsi-ort-old10',
 							name: '1961',
@@ -496,10 +470,16 @@
 						if (genre) {
 							const genreParts = genre.split(' ');
 							const firstWordOfGenre = genreParts[0];
-							genrePillHTML = `<span class="popup-genre-pill" title="${genre}">${firstWordOfGenre}</span>`;
+							// Add onclick to trigger search with the first word of the genre
+							genrePillHTML = `<span class="popup-genre-pill" title="${genre}" onclick="triggerSearchFromElement(this, '${firstWordOfGenre.replace(/'/g, "\\'")}')">${firstWordOfGenre}</span>`;
 						}
-						// const genrePillHTML = genre ? `<span class="popup-genre-pill">${genre}</span>` : '';
-						const hashtagHTML = hashtag ? `<p class="popup-hashtag">${hashtag}</p>` : '';
+						
+						let hashtagHTML = '';
+						if (hashtag) {
+							// Add onclick to trigger search with the hashtag text
+							hashtagHTML = `<p class="popup-hashtag" onclick="triggerSearchFromElement(this, '${hashtag.replace(/'/g, "\\'")}')">${hashtag}</p>`;
+						}
+
 
 						const popupHTML = `
 							<img src="${imageUrl}" class="popup-protruding-icon">
@@ -619,6 +599,18 @@
 						});
 						controlsContainer.appendChild(itemContainer);
 					});
+				}
+
+				function triggerSearchFromElement(element, searchTerm) {
+					const searchContainer = document.getElementById('search-container');
+					const searchInput = document.getElementById('search-input');
+
+					if (!searchContainer.classList.contains('search-active')) {
+						searchContainer.classList.add('search-active');
+					}
+					searchInput.value = searchTerm;
+					searchInput.focus();
+					filterAndRefreshUI(searchTerm.toLowerCase());
 				}
 
 				function setupSearchFeature() {
