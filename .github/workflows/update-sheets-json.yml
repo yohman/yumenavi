@@ -1,4 +1,4 @@
-name: Update sheets_data.json from Google Sheets
+name: Update sheets_data.json from Google Sheets!
 
 on:
   schedule:
