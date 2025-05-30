@@ -589,6 +589,23 @@ body {
     color: #aecbfa; /* Lighter blue on hover */
 }
 
+#mapping-memories-count {
+    font-size: 1.1em;
+    color: #b0b0b0; /* A slightly muted, elegant light gray */
+    margin-top: 15px; /* Space above */
+    margin-bottom: 10px; /* Space below, before the slogan */
+    font-style: italic;
+    opacity: 0; /* Initially hidden, to be faded in by JS or if data loads fast */
+    animation: fadeInEffect 1s ease-in-out forwards;
+    animation-delay: 0.5s; /* Slight delay before fading in */
+}
+
+@keyframes fadeInEffect {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
 #welcome-modal-content .slogan {
 	font-size: 1em; /* Adjusted font size */
 	color: #ccc; /* Light gray slogan */

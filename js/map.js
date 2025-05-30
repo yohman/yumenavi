@@ -310,6 +310,15 @@ function processAndSetupMap() {
 
     console.log("Processed sheet2 data (with added ID and avatar URL):", sheet2);
     currentFilteredData = [...sheet2]; // Initialize with all processed data
+
+    // Update the modal with the count of memories
+    const memoriesCountElement = document.getElementById('mapping-memories-count');
+    if (memoriesCountElement) {
+        memoriesCountElement.textContent = `Mapping ${sheet2.length} memories...`;
+    } else {
+        console.warn("Element with ID 'mapping-memories-count' not found in the modal.");
+    }
+
     setupMapAndUI(); // Call the main UI setup function
 }
 
@@ -361,6 +370,7 @@ function setupModal() {
     if (modalOverlay && modalCloseButton) {
         // If URL parameters were successfully parsed and applied, hide the modal.
         // Otherwise, it will be visible by default (as per initial HTML/CSS).
+        // The text content for 'mapping-memories-count' is set in processAndSetupMap.
         if (mapInitState.urlStateApplied) {
             modalOverlay.classList.add('modal-hidden');
         }
