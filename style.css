@@ -177,6 +177,7 @@ body {
 
 /* Horizontal Card Scroller Styles */
 #horizontal-card-scroller {
+    display: none;
     position: absolute;
     top: 0; /* Position at the top of the .content area */
     left: 0;
